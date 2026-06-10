@@ -35,10 +35,14 @@ class ArgsMock:
   bigquery_dataset: str
   bigquery_table: str
   assessment_file: str
-  use_annotations: str
+  extract_brand_metadata: bool
+  use_annotations: bool
   use_llms: bool
+  run_long_form_abcd: bool
+  run_shorts: bool
+  features_to_evaluate: str
+  creative_provider_type: str
   verbose: bool
-  annotation_path: str
   # set videos
   video_uris: str
   # set brand
@@ -56,11 +60,10 @@ class ArgsMock:
   dynamic_cutoff_ms: float
   # set model
   llm_name: str
-  video_size_limit_mb: int
+  llm_location: str
   max_output_tokens: int
   temperature: float
   top_p: float
-  top_k: float
 
 
 def test_not_empty_abcd_params():
@@ -74,10 +77,14 @@ def test_not_empty_abcd_params():
       bigquery_dataset="abcd_detector_ds",
       bigquery_table="my_table",
       assessment_file="",
+      extract_brand_metadata=False,
       use_annotations=True,
       use_llms=True,
+      run_long_form_abcd=True,
+      run_shorts=True,
+      features_to_evaluate="",
+      creative_provider_type="GCS",
       verbose=True,
-      annotation_path="",
       video_uris="gs://abcd-detector-input/Google/videos/",
       brand_name="Google",
       brand_variations="Google,google",
@@ -91,11 +98,10 @@ def test_not_empty_abcd_params():
       avg_shot_duration_seconds=3,
       dynamic_cutoff_ms=3000,
       llm_name="gemini-1.5-pro-002",
-      top_p=0.1,
-      video_size_limit_mb=50,
+      llm_location="us-central1",
       max_output_tokens=8000,
       temperature=1,
-      top_k=0.1,
+      top_p=0.1,
   )
 
   config = build_abcd_params_config(args)
@@ -141,9 +147,7 @@ def test_not_empty_abcd_params():
   assert config.dynamic_cutoff_ms is not None
 
   # set model
-  assert config.llm_name is not None
-  assert config.video_size_limit_mb is not None
-  assert config.max_output_tokens is not None
-  assert config.temperature is not None
-  assert config.top_p is not None
-  assert config.top_k is not None
+  assert config.llm_params.model_name is not None
+  assert config.llm_params.generation_config["max_output_tokens"] is not None
+  assert config.llm_params.generation_config["temperature"] is not None
+  assert config.llm_params.generation_config["top_p"] is not None

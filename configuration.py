@@ -21,13 +21,9 @@
 """Module that defines global parameters"""
 
 import os
+import shutil
+import tempfile
 from models import CreativeProviderType, LLMParameters
-
-FFMPEG_BUFFER = "reduced/buffer.mp4"
-FFMPEG_BUFFER_REDUCED = "reduced/buffer_reduced.mp4"
-
-if not os.path.exists("reduced"):
-  os.makedirs("reduced")
 
 
 class Configuration:
@@ -55,7 +51,7 @@ class Configuration:
     self.use_llms = True
     self.run_long_form_abcd: bool = True
     self.run_shorts: bool = True
-    self.features_to_evaluate: list[str]  # list of feature ids to run
+    self.features_to_evaluate: list[str] = []  # list of feature ids to run
     self.creative_provider_type = CreativeProviderType.GCS  # GCS by default
 
     # set videos
@@ -78,6 +74,13 @@ class Configuration:
 
     # set llm params
     self.llm_params: LLMParameters = LLMParameters()
+
+    # unique temp dir per request — safe for concurrent Cloud Run instances
+    self._temp_dir: str = tempfile.mkdtemp(prefix="abcd_")
+    self.ffmpeg_buffer: str = os.path.join(self._temp_dir, "buffer.mp4")
+    self.ffmpeg_buffer_reduced: str = os.path.join(
+        self._temp_dir, "buffer_reduced.mp4"
+    )
 
   def set_parameters(
       self,
@@ -240,3 +243,8 @@ class Configuration:
         "top_p": float(top_p),
         "response_schema": {"type": "string"},
     }
+
+  def cleanup(self) -> None:
+    """Remove the per-request temp directory (idempotent)."""
+    if os.path.exists(self._temp_dir):
+      shutil.rmtree(self._temp_dir)

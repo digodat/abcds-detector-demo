@@ -165,6 +165,102 @@ You can see more on the ABCD methodology [here.](https://www.thinkwithgoogle.com
 
 ## Where to start?
 
+There are three ways to run ABCDs Detector:
+
+| Mode | Best for |
+|------|----------|
+| **Cloud Run HTTP Service** | Consuming the evaluator from a frontend or external system |
+| **Google Colab Notebook** | Interactive exploration and one-off evaluations |
+| **CLI (local)** | Debugging and development |
+
+---
+
+## Cloud Run HTTP Service
+
+The project includes a FastAPI HTTP server (`server.py`) that exposes the evaluator as a REST endpoint, ready to deploy as a **Cloud Run Service**.
+
+### Deploy via repository connection
+
+1. Connect this repository to Cloud Run in the [Google Cloud Console](https://console.cloud.google.com/run).
+2. Cloud Run detects the `Dockerfile` automatically.
+3. Configure the following environment variables in the service settings:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `PROJECT_ID` | GCP project ID | Yes |
+| `KG_API_KEY` | Knowledge Graph API key (use Secret Manager) | Optional |
+
+4. Set **concurrency to 1** per instance to avoid temp file conflicts when processing large batches. Increase when needed after validating.
+
+### API reference
+
+**Health check**
+```
+GET /health
+→ {"status": "ok"}
+```
+
+**Evaluate videos**
+```
+POST /evaluate
+Content-Type: application/json
+
+{
+  "video_uris": ["gs://my-bucket/video.mp4"],
+  "bucket_name": "my-bucket",
+  "project_id": "my-gcp-project",      // or set PROJECT_ID env var
+  "brand_name": "My Brand",            // optional if extract_brand_metadata=true
+  "use_llms": true,
+  "use_annotations": false,
+  "run_long_form_abcd": true,
+  "run_shorts": false,
+  "extract_brand_metadata": true
+}
+```
+
+Response:
+```json
+{
+  "status": "success",
+  "assessments": [
+    {
+      "brand_name": "My Brand",
+      "video_uri": "gs://my-bucket/video.mp4",
+      "long_form_abcd": [
+        {
+          "feature_id": "a_dynamic_start",
+          "feature_name": "Dynamic Start",
+          "detected": true,
+          "confidence_score": 0.9,
+          "rationale": "...",
+          "evidence": "...",
+          "strengths": "...",
+          "weaknesses": "..."
+        }
+      ],
+      "shorts": []
+    }
+  ]
+}
+```
+
+Interactive API docs are available at `<service-url>/docs` once deployed.
+
+### GCP APIs required for Cloud Run
+
+Enable the following APIs in your project:
+- [Vertex AI API](https://console.cloud.google.com/marketplace/product/google/aiplatform.googleapis.com) — for Gemini LLM evaluation
+- [Cloud Storage API](https://console.cloud.google.com/marketplace/product/google/storage.googleapis.com) — to read videos
+- [Cloud Run API](https://console.cloud.google.com/marketplace/product/google/run.googleapis.com)
+- [Video Intelligence API](https://console.cloud.google.com/marketplace/product/google/videointelligence.googleapis.com) — only if `use_annotations: true`
+- [BigQuery](https://console.cloud.google.com/marketplace/product/google/bigquery.googleapis.com) — only if storing results in BQ
+
+The service account attached to Cloud Run needs the following roles: `roles/aiplatform.user`, `roles/storage.objectViewer`, `roles/bigquery.dataEditor` (optional), `roles/cloudvideointelligence.serviceAgent` (optional).
+
+---
+
+## Colab / Local usage
+
 1. Navigate to [colab.research.google.com](http://colab.research.google.com).
 2. In the dialog, open a Notebook from GitHub.
 3. Enter the url from this page.

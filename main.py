@@ -33,7 +33,9 @@ from creative_providers import creative_provider_registry
 from evaluation_services import video_evaluation_service
 
 
-def execute_abcd_assessment_for_videos(config: Configuration):
+def execute_abcd_assessment_for_videos(
+  config: Configuration,
+) -> list[models.VideoAssessment]:
   """Execute ABCD Assessment for all brand videos retrieved by the Creative Provider"""
 
   creative_provider: creative_provider_proto.CreativeProviderProto = (
@@ -43,6 +45,8 @@ def execute_abcd_assessment_for_videos(config: Configuration):
   )
 
   video_uris = creative_provider.get_creative_uris(config)
+
+  assessments: list[models.VideoAssessment] = []
 
   for video_uri in video_uris:
 
@@ -113,6 +117,8 @@ def execute_abcd_assessment_for_videos(config: Configuration):
         config=config,
     )
 
+    assessments.append(video_assessment)
+
     # Print assessments for Full ABCD and Shorts and store results
     if len(long_form_abcd_evaluated_features) > 0:
       generic_helpers.print_abcd_assessment(
@@ -139,7 +145,10 @@ def execute_abcd_assessment_for_videos(config: Configuration):
       generic_helpers.store_in_bq(config, video_assessment)
 
     # Remove local version of video files
-    generic_helpers.remove_local_video_files()
+    generic_helpers.remove_local_video_files(config)
+
+  config.cleanup()
+  return assessments
 
 
 def main(arg_list: list[str] | None = None) -> None:
@@ -167,8 +176,11 @@ def main(arg_list: list[str] | None = None) -> None:
     logging.info("Starting ABCD assessment... \n")
 
     if config.video_uris:
-      execute_abcd_assessment_for_videos(config)
-      logging.info("Finished ABCD assessment. \n")
+      try:
+        execute_abcd_assessment_for_videos(config)
+        logging.info("Finished ABCD assessment. \n")
+      finally:
+        config.cleanup()
     else:
       logging.info("There are no videos to process. \n")
 

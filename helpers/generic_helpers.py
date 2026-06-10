@@ -22,7 +22,8 @@
 
 import json
 import os
-import urllib
+import urllib.parse
+import urllib.request
 import datetime
 from concurrent.futures import ThreadPoolExecutor
 import pandas
@@ -31,7 +32,7 @@ from google.cloud import bigquery
 from moviepy.editor import VideoFileClip
 from gcp_api_services import bigquery_api_service
 from gcp_api_services import gcs_api_service
-from configuration import FFMPEG_BUFFER, FFMPEG_BUFFER_REDUCED, Configuration
+from configuration import Configuration
 import models
 
 
@@ -76,12 +77,11 @@ def get_knowledge_graph_entities(
     raise
 
 
-def remove_local_video_files():
-  """Removes local video files"""
-  if os.path.exists(FFMPEG_BUFFER):
-    os.remove(FFMPEG_BUFFER)
-  if os.path.exists(FFMPEG_BUFFER_REDUCED):
-    os.remove(FFMPEG_BUFFER_REDUCED)
+def remove_local_video_files(config: Configuration) -> None:
+  """Removes per-video buffer files from the request temp directory."""
+  for path in [config.ffmpeg_buffer, config.ffmpeg_buffer_reduced]:
+    if os.path.exists(path):
+      os.remove(path)
 
 
 def trim_video(config: Configuration, video_uri: str):
@@ -99,7 +99,7 @@ def trim_video(config: Configuration, video_uri: str):
     print(f"Shortening video {video_uri}. \n")
 
     # download
-    with open(FFMPEG_BUFFER, "wb") as f:
+    with open(config.ffmpeg_buffer, "wb") as f:
       blob = gcs_api_service.gcs_api_service.get_blob(video_uri)
       if blob:
         f.write(blob.download_as_string(client=None))
@@ -109,13 +109,15 @@ def trim_video(config: Configuration, video_uri: str):
         raise ValueError(msg)
 
     # trim
-    clip = VideoFileClip(FFMPEG_BUFFER)
-    clip = clip.subclip(0, 5)
-    clip.write_videofile(FFMPEG_BUFFER_REDUCED)
+    source_clip = VideoFileClip(config.ffmpeg_buffer)
+    try:
+      source_clip.subclip(0, 5).write_videofile(config.ffmpeg_buffer_reduced)
+    finally:
+      source_clip.close()
 
     # upload
     gcs_api_service.gcs_api_service.upload_blob(
-        reduced_uri, FFMPEG_BUFFER_REDUCED
+        reduced_uri, config.ffmpeg_buffer_reduced
     )
 
   else:
@@ -448,7 +450,7 @@ def build_features_for_bq(
   evaluated_features.extend(video_assessment.shorts_evaluated_features)
   # Insert all feature configs first
   for eval_feature in evaluated_features:
-    if config.creative_provider_type == models.CreativeProviderType:
+    if config.creative_provider_type == models.CreativeProviderType.GCS:
       video_name = gcs_api_service.gcs_api_service.get_video_name_from_uri(
           video_assessment.video_uri
       )

@@ -1,0 +1,17 @@
+.git
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+*.ipynb
+.pre-commit-config.yaml
+.pylintrc
+pyproject.toml
+docs/
+tests/
+reduced/
+*.egg-info
+.venv
+venv
+.env
+*.env
