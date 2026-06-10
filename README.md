@@ -183,12 +183,14 @@ The project includes a FastAPI HTTP server (`server.py`) that exposes the evalua
 
 1. Connect this repository to Cloud Run in the [Google Cloud Console](https://console.cloud.google.com/run).
 2. Cloud Run detects the `Dockerfile` automatically.
-3. Configure the following environment variables in the service settings:
+3. Configure the following environment variables in the service settings (todas opcionales):
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `PROJECT_ID` | GCP project ID | Yes |
-| `KG_API_KEY` | Knowledge Graph API key (use Secret Manager) | Optional |
+| Variable | Description |
+|----------|-------------|
+| `KG_API_KEY` | Knowledge Graph API key (use Secret Manager) |
+| `PROJECT_ID` | GCP project ID — solo necesario si el service account no tiene proyecto configurado en sus credenciales (caso infrecuente) |
+
+El `project_id` se resuelve automáticamente en este orden: (1) campo `project_id` en el body del request, (2) Application Default Credentials del service account de Cloud Run, (3) variable de entorno `PROJECT_ID`.
 
 4. Set **concurrency to 1** per instance to avoid temp file conflicts when processing large batches. Increase when needed after validating.
 
@@ -208,7 +210,7 @@ Content-Type: application/json
 {
   "video_uris": ["gs://my-bucket/video.mp4"],
   "bucket_name": "my-bucket",
-  "project_id": "my-gcp-project",      // or set PROJECT_ID env var
+  "project_id": "my-gcp-project",      // optional: inferred from ADC if omitted
   "brand_name": "My Brand",            // optional if extract_brand_metadata=true
   "use_llms": true,
   "use_annotations": false,

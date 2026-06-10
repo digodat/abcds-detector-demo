@@ -13,6 +13,18 @@ app = FastAPI(title="ABCD Detector API")
 logging.basicConfig(level=logging.INFO)
 
 
+def _resolve_project_id() -> str:
+  """Resolve GCP project ID: ADC first, then PROJECT_ID env var."""
+  try:
+    import google.auth
+    _, project = google.auth.default()
+    if project:
+      return project
+  except Exception:
+    pass
+  return os.environ.get("PROJECT_ID", "")
+
+
 @app.get("/health")
 def health():
   """Health check endpoint for Cloud Run."""
@@ -23,12 +35,12 @@ def health():
 def evaluate(request: EvaluateRequest):
   """Evaluate ABCD features for the given video URIs."""
 
-  # project_id can come from the request or from the env var PROJECT_ID
-  project_id = request.project_id or os.environ.get("PROJECT_ID", "")
+  # Prefer explicit project_id in the request; fall back to ADC / env var
+  project_id = request.project_id or _resolve_project_id()
   if not project_id:
     raise HTTPException(
         status_code=400,
-        detail="project_id is required. Set it in the request or in the PROJECT_ID env var.",
+        detail="project_id could not be determined. Pass it in the request body or ensure the service runs with a GCP service account.",
     )
 
   # KG API key can come from the request or from the env var KG_API_KEY
