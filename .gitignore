@@ -1,15 +1,50 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # Python
-venv
+__pycache__/
 **/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# Environment variables and secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
+service_account*.json
+*credentials*.json
+*secret*.json
+
+# Test and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Build artifacts from this project
 reduced/
 ffmpeg
-annotations_evaluation/_pycache_
-feature_configs/_pycache_
-helpers/_pycache_
-llms_evaluation/_pycache_
-prompts/_pycache_
 
 # IDEs and editors
 .idea/
@@ -26,18 +61,11 @@ prompts/_pycache_
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.history/*
-
-# Miscellaneous
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
+.history/
 
 # System files
 .DS_Store
 Thumbs.db
 
-# Git
-.git
+# Logs
+*.log
