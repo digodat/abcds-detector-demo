@@ -1,0 +1,42 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Build
+    args:
+      - 'build'
+      - '-t'
+      - '$_AR_HOSTNAME/$PROJECT_ID/$_DEPLOY_REGION/$_SERVICE_NAME:$COMMIT_SHA'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Push
+    args:
+      - 'push'
+      - '$_AR_HOSTNAME/$PROJECT_ID/$_DEPLOY_REGION/$_SERVICE_NAME:$COMMIT_SHA'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: Deploy
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '$_SERVICE_NAME'
+      - '--image=$_AR_HOSTNAME/$PROJECT_ID/$_DEPLOY_REGION/$_SERVICE_NAME:$COMMIT_SHA'
+      - '--region=$_DEPLOY_REGION'
+      - '--quiet'
+
+images:
+  - '$_AR_HOSTNAME/$PROJECT_ID/$_DEPLOY_REGION/$_SERVICE_NAME:$COMMIT_SHA'
+
+# Default substitution values.
+# These can be overridden in the Cloud Build trigger settings in GCP Console.
+substitutions:
+  _AR_HOSTNAME: us-central1-docker.pkg.dev
+  _DEPLOY_REGION: us-central1
+  _SERVICE_NAME: abcds-detector-demo
+
+options:
+  # ALLOW_LOOSE lets Cloud Run pass extra substitutions (e.g. _TRIGGER_ID)
+  # without causing a build failure.
+  substitutionOption: ALLOW_LOOSE
+  # Avoids needing a separate GCS bucket for build logs.
+  logging: CLOUD_LOGGING_ONLY
