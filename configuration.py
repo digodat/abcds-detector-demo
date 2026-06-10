@@ -23,6 +23,7 @@
 import os
 import shutil
 import tempfile
+from typing import Callable
 from models import CreativeProviderType, LLMParameters
 
 
@@ -74,6 +75,9 @@ class Configuration:
 
     # set llm params
     self.llm_params: LLMParameters = LLMParameters()
+
+    # optional callback for streaming progress events (used by /evaluate/stream)
+    self.progress_callback: Callable[[dict], None] | None = None
 
     # unique temp dir per request — safe for concurrent Cloud Run instances
     self._temp_dir: str = tempfile.mkdtemp(prefix="abcd_")
