@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel
 import models
 
@@ -38,6 +38,9 @@ class EvaluateRequest(BaseModel):
   run_shorts: Optional[bool] = True
   creative_provider_type: Optional[str] = "GCS"
   features_to_evaluate: Optional[list[str]] = []
+
+  # Output language
+  language: Literal["EN", "ES"] = "EN"
 
   # LLM params
   llm_name: Optional[str] = "gemini-2.5-pro"
@@ -104,6 +107,7 @@ class VideoAssessmentResponse(BaseModel):
   video_uri: str
   long_form_abcd: list[FeatureEvaluationResponse]
   shorts: list[FeatureEvaluationResponse]
+  error: Optional[str] = None
 
   @classmethod
   def from_video_assessment(
@@ -121,6 +125,7 @@ class VideoAssessmentResponse(BaseModel):
             FeatureEvaluationResponse.from_feature_evaluation(f)
             for f in assessment.shorts_evaluated_features
         ],
+        error=assessment.error,
     )
 
 

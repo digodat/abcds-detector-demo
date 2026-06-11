@@ -85,6 +85,7 @@ class VideoAssessment:
   long_form_abcd_evaluated_features: list[FeatureEvaluation]
   shorts_evaluated_features: list[FeatureEvaluation]
   config: any  # TODO (ae) change this later
+  error: str | None = None
 
 
 @dataclass

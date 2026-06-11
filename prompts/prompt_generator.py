@@ -25,6 +25,12 @@ from configuration import Configuration
 from models import VideoFeature, PromptConfig
 
 
+_LANGUAGE_INSTRUCTIONS = {
+    "EN": "Write all text fields (rationale, evidence, strengths, weaknesses) exclusively in English.",
+    "ES": "Escribe todos los campos de texto (rationale, evidence, strengths, weaknesses) exclusivamente en español.",
+}
+
+
 class PromptGenerator:
   """Class to generate the prompts that will contain the ABCD features."""
 
@@ -40,6 +46,7 @@ class PromptGenerator:
         prompt: string prompt template
     """
     features_questions = self.get_features_prompt_template(features, config)
+    language_instruction = _LANGUAGE_INSTRUCTIONS.get(config.language, _LANGUAGE_INSTRUCTIONS["EN"])
 
     system_instructions = """
             You are an AI Video Analysis Engine. Your primary function is to act as a meticulous and objective creative expert.
@@ -78,11 +85,18 @@ class PromptGenerator:
             The value for the feature id "id" key MUST be an exact, case-sensitive copy of the Feature ID provided in the input prompt.
             The evaluation will fail if the id is not found or does not match exactly.
             Preserve the original data type (e.g., string, etc).
+
+            ## OUTPUT LANGUAGE
+            {language_instruction}
         """
 
     prompt = """These are the questions that you have to answer for each feature:
         {features_questions}""".replace(
         "{features_questions}", features_questions
+    )
+
+    system_instructions = system_instructions.replace(
+        "{language_instruction}", language_instruction
     )
 
     prompt_config = PromptConfig(

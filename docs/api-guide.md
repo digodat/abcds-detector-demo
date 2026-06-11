@@ -109,6 +109,7 @@ Si `extract_brand_metadata` es `false`, los cuatro primeros campos se vuelven **
 | `run_shorts` | `boolean` | `true` | Evaluar las 20 features del framework para YouTube Shorts |
 | `creative_provider_type` | `string` | `"GCS"` | Fuente de los videos. Valores: `"GCS"` (Google Cloud Storage) o `"YOUTUBE"` (URLs de YouTube). Con `"YOUTUBE"` solo se puede usar LLMs (`use_annotations` se ignora) |
 | `features_to_evaluate` | `string[]` | `[]` | Lista de IDs de features específicas a evaluar. Si está vacío, se evalúan todas las features habilitadas. Ver [Catálogo de features](#catálogo-de-features) |
+| `language` | `string` | `"EN"` | Idioma del output. Valores: `"EN"` (inglés) o `"ES"` (español). Afecta los campos de texto del modelo: `rationale`, `evidence`, `strengths`, `weaknesses`. Un valor inválido retorna HTTP `422` |
 
 ---
 
@@ -149,15 +150,18 @@ En la mayoría de los casos no es necesario modificarlos.
       "brand_name": "string",
       "video_uri": "string",
       "long_form_abcd": [ /* FeatureEvaluation[] */ ],
-      "shorts": [ /* FeatureEvaluation[] */ ]
+      "shorts": [ /* FeatureEvaluation[] */ ],
+      "error": null
     }
   ]
 }
 ```
 
-- `assessments` contiene un objeto por cada URI enviada en el request, **en el mismo orden**.
+- `assessments` contiene **un objeto por cada URI enviada en el request, en el mismo orden**, incluso si algún video falló.
 - Si `run_long_form_abcd: false`, el campo `long_form_abcd` llega como array vacío `[]`.
 - Si `run_shorts: false`, el campo `shorts` llega como array vacío `[]`.
+- Si un video falló, `error` contiene el mensaje de error y `long_form_abcd` / `shorts` llegan como arrays vacíos `[]`. Los demás videos del batch sí incluyen sus resultados normalmente.
+- `status` es `"success"` cuando todos los videos se procesaron correctamente, o `"partial"` cuando al menos uno falló.
 
 ---
 
@@ -214,6 +218,14 @@ Estos campos contienen el razonamiento del modelo en texto libre. **Pueden llega
 | `strengths` | `string` | Aspectos positivos del video para esta feature |
 | `weaknesses` | `string` | Aspectos a mejorar. Si la feature fue detectada con alta confianza, puede ser `""` |
 
+#### Campo de error por video
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `error` | `string \| null` | `null` en evaluaciones exitosas. Si el video falló (error de GCS, timeout de Gemini, URI incompatible con el provider, etc.), contiene el mensaje de error y los arrays `long_form_abcd` y `shorts` llegan vacíos |
+
+> **Nota sobre `brand_name` en el response:** el campo refleja el valor enviado en el request (`brand_name`). Si no se envió `brand_name` (porque se usa `extract_brand_metadata: true` para que el modelo lo infiera), el campo llegará como `""`. El nombre que extrae el modelo se usa internamente para la evaluación pero no se retorna en el response.
+
 ---
 
 ### Ejemplo de respuesta completa
@@ -255,11 +267,56 @@ Request con un video GCS, `run_long_form_abcd: true`, `run_shorts: false`, y `fe
           "weaknesses": "La marca no aparece visualmente en el video. Incorporar logo o packaging incrementa el recuerdo de marca."
         }
       ],
-      "shorts": []
+      "shorts": [],
+      "error": null
     }
   ]
 }
 ```
+
+### Ejemplo de respuesta parcial
+
+Request con dos videos, donde el segundo falla (por ejemplo, el archivo no existe en GCS):
+
+```json
+{
+  "status": "partial",
+  "assessments": [
+    {
+      "brand_name": "Mi Marca",
+      "video_uri": "gs://mi-bucket/videos/ad_verano.mp4",
+      "long_form_abcd": [
+        {
+          "feature_id": "a_dynamic_start",
+          "feature_name": "Dynamic Start",
+          "category": "LONG_FORM_ABCD",
+          "sub_category": "ATTRACT",
+          "video_segment": "FULL_VIDEO",
+          "detected": true,
+          "confidence_score": 0.92,
+          "rationale": "El primer corte ocurre en el segundo 1.8, cumpliendo el criterio de menos de 3 segundos.",
+          "evidence": "Segundo 0–1.8: escena de apertura con plano general. Segundo 1.8: corte a primer plano del producto.",
+          "strengths": "Inicio visualmente dinámico que captura la atención de forma inmediata.",
+          "weaknesses": ""
+        }
+      ],
+      "shorts": [],
+      "error": null
+    },
+    {
+      "brand_name": "Mi Marca",
+      "video_uri": "gs://mi-bucket/videos/ad_navidad.mp4",
+      "long_form_abcd": [],
+      "shorts": [],
+      "error": "404 GET https://storage.googleapis.com/mi-bucket/videos/ad_navidad.mp4: Not Found"
+    }
+  ]
+}
+```
+
+- El primer video se procesó correctamente y tiene sus features.
+- El segundo falló — `long_form_abcd` y `shorts` son arrays vacíos, y `error` contiene el mensaje.
+- El response llega con HTTP `200` y `status: "partial"`.
 
 ---
 
@@ -267,10 +324,12 @@ Request con un video GCS, `run_long_form_abcd: true`, `run_shorts: false`, y `fe
 
 | Código | Situación |
 |--------|-----------|
-| `200` | Evaluación completada con éxito |
+| `200` | Evaluación completada. El campo `status` indica si fue `"success"` (todos los videos OK) o `"partial"` (al menos un video falló) |
 | `400` | Request inválido. Causas: `project_id` no pudo determinarse, o `extract_brand_metadata: false` sin datos de marca provistos |
 | `422` | Falta un campo requerido (`video_uris` o `bucket_name`) o un tipo de dato es incorrecto |
-| `500` | Error interno durante la evaluación (error de GCS, Gemini, etc.). El campo `detail` del response contiene el mensaje de error |
+| `500` | Error fatal inesperado antes de comenzar la evaluación. El campo `detail` contiene el mensaje |
+
+> **Errores por video individual:** se retornan con HTTP `200` y el assessment del video afectado incluye `"error": "mensaje"`. El batch continúa procesando los videos restantes.
 
 ### Formato del error
 
@@ -354,12 +413,14 @@ const response = await fetch(`${SERVICE_URL}/evaluate`, {
     use_llms: true,
     use_annotations: false,
     run_long_form_abcd: true,
-    run_shorts: false
+    run_shorts: false,
+    language: 'ES'
   })
 })
 
 const data = await response.json()
 // data.assessments[0].long_form_abcd → array de FeatureEvaluation
+// data.assessments[0].long_form_abcd[0].rationale → texto en español
 ```
 
 ---
@@ -484,9 +545,10 @@ data: {"type": "...", ...}
 |--------|----------------|
 | `video_start` | Al iniciar el procesamiento de cada video |
 | `step` | Antes y después de cada paso dentro de un video |
-| `video_done` | Al terminar de procesar un video |
-| `done` | Al finalizar todos los videos — incluye los resultados completos |
-| `error` | Si ocurre un error fatal durante la evaluación |
+| `video_done` | Al terminar de procesar un video correctamente |
+| `video_error` | Si un video individual falla. El batch continúa con los videos restantes |
+| `done` | Al finalizar todos los videos — incluye los resultados completos (con `status: "success"` o `"partial"`) |
+| `error` | Si ocurre un error fatal que aborta toda la evaluación |
 
 ### Pasos (`step`)
 
@@ -502,27 +564,58 @@ Cada evento `step` incluye `"status": "running"` al comenzar y `"status": "done"
 
 ### Esquema de cada evento
 
-**`video_start` / `video_done`:**
+**`video_start`:**
 ```json
 {
   "type": "video_start",
-  "video_uri": "gs://mi-bucket/video.mp4",
+  "video_uri": "gs://mi-bucket/videos/ad_verano.mp4",
   "index": 1,
-  "total": 3
+  "total": 2
 }
 ```
 
-**`step`:**
+**`step` — inicio de paso:**
 ```json
 {
   "type": "step",
   "step": "long_form_abcd",
   "status": "running",
-  "video_uri": "gs://mi-bucket/video.mp4"
+  "video_uri": "gs://mi-bucket/videos/ad_verano.mp4"
 }
 ```
 
-**`done` — contiene los resultados completos:**
+**`step` — fin de paso:**
+```json
+{
+  "type": "step",
+  "step": "long_form_abcd",
+  "status": "done",
+  "video_uri": "gs://mi-bucket/videos/ad_verano.mp4"
+}
+```
+
+**`video_done`:**
+```json
+{
+  "type": "video_done",
+  "video_uri": "gs://mi-bucket/videos/ad_verano.mp4",
+  "index": 1,
+  "total": 2
+}
+```
+
+**`video_error` — fallo en un video individual (el batch continúa):**
+```json
+{
+  "type": "video_error",
+  "video_uri": "gs://mi-bucket/videos/ad_navidad.mp4",
+  "index": 2,
+  "total": 2,
+  "detail": "404 GET https://storage.googleapis.com/mi-bucket/videos/ad_navidad.mp4: Not Found"
+}
+```
+
+**`done` — fin del batch, incluye todos los resultados:**
 ```json
 {
   "type": "done",
@@ -530,22 +623,59 @@ Cada evento `step` incluye `"status": "running"` al comenzar y `"status": "done"
   "assessments": [
     {
       "brand_name": "Mi Marca",
-      "video_uri": "gs://mi-bucket/video.mp4",
-      "long_form_abcd": [ ],
-      "shorts": [ ]
+      "video_uri": "gs://mi-bucket/videos/ad_verano.mp4",
+      "long_form_abcd": [
+        {
+          "feature_id": "a_dynamic_start",
+          "feature_name": "Dynamic Start",
+          "category": "LONG_FORM_ABCD",
+          "sub_category": "ATTRACT",
+          "video_segment": "FULL_VIDEO",
+          "detected": true,
+          "confidence_score": 0.92,
+          "rationale": "El primer corte ocurre en el segundo 1.8, cumpliendo el criterio de menos de 3 segundos.",
+          "evidence": "Segundo 0–1.8: escena de apertura con plano general. Segundo 1.8: corte a primer plano del producto.",
+          "strengths": "Inicio visualmente dinámico que captura la atención de forma inmediata.",
+          "weaknesses": ""
+        }
+      ],
+      "shorts": [],
+      "error": null
     }
   ]
 }
 ```
 
-> La estructura de cada objeto en `assessments` es idéntica a la respuesta de `POST /evaluate`. Ver [Respuesta](#respuesta).
+La estructura de cada objeto en `assessments` es idéntica a la respuesta de `POST /evaluate`. `status` es `"success"` o `"partial"` según si todos los videos se procesaron correctamente. Ver [Respuesta](#respuesta).
 
-**`error`:**
+**`error` — fallo fatal que aborta toda la evaluación:**
 ```json
 {
   "type": "error",
-  "detail": "mensaje de error"
+  "detail": "project_id could not be determined."
 }
+```
+
+### Secuencia completa de eventos para un batch de 2 videos
+
+```
+data: {"type":"video_start","video_uri":"gs://mi-bucket/ad_verano.mp4","index":1,"total":2}
+
+data: {"type":"step","step":"trim","status":"running","video_uri":"gs://mi-bucket/ad_verano.mp4"}
+
+data: {"type":"step","step":"trim","status":"done","video_uri":"gs://mi-bucket/ad_verano.mp4"}
+
+data: {"type":"step","step":"long_form_abcd","status":"running","video_uri":"gs://mi-bucket/ad_verano.mp4"}
+
+data: {"type":"step","step":"long_form_abcd","status":"done","video_uri":"gs://mi-bucket/ad_verano.mp4"}
+
+data: {"type":"video_done","video_uri":"gs://mi-bucket/ad_verano.mp4","index":1,"total":2}
+
+data: {"type":"video_start","video_uri":"gs://mi-bucket/ad_navidad.mp4","index":2,"total":2}
+
+data: {"type":"video_error","video_uri":"gs://mi-bucket/ad_navidad.mp4","index":2,"total":2,"detail":"404 Not Found"}
+
+data: {"type":"done","status":"partial","assessments":[...]}
 ```
 
 ### Ejemplo en JavaScript
@@ -558,6 +688,7 @@ async function evaluarConProgreso(requestBody, onEvent) {
     body: JSON.stringify(requestBody),
   })
 
+  // Errores de setup (400, 422) llegan antes de que empiece el stream
   if (!response.ok) {
     const err = await response.json()
     throw new Error(err.detail)
@@ -588,22 +719,34 @@ async function evaluarConProgreso(requestBody, onEvent) {
 // Uso:
 const assessments = await evaluarConProgreso(
   {
-    video_uris: ['gs://mi-bucket/ad_verano.mp4'],
+    video_uris: [
+      'gs://mi-bucket/videos/ad_verano.mp4',
+      'gs://mi-bucket/videos/ad_navidad.mp4',
+    ],
     bucket_name: 'mi-bucket',
     brand_name: 'Mi Marca',
     run_long_form_abcd: true,
     run_shorts: false,
+    language: 'ES',
   },
   (event) => {
     if (event.type === 'video_start') {
-      console.log(`Video ${event.index}/${event.total}: iniciando`)
+      console.log(`Iniciando video ${event.index}/${event.total}: ${event.video_uri}`)
     } else if (event.type === 'step' && event.status === 'running') {
       console.log(`  → ${event.step}...`)
+    } else if (event.type === 'step' && event.status === 'done') {
+      console.log(`  ✓ ${event.step}`)
     } else if (event.type === 'video_done') {
-      console.log(`  Video ${event.index} completado`)
+      console.log(`Video ${event.index} completado`)
+    } else if (event.type === 'video_error') {
+      console.warn(`Video ${event.index} falló: ${event.detail}`)
     }
   }
 )
+
+// assessments puede incluir objetos con error !== null si algún video falló
+const exitosos = assessments.filter(a => a.error === null)
+const fallidos = assessments.filter(a => a.error !== null)
 ```
 
 > **Nota sobre `EventSource`:** La API nativa `EventSource` del browser no soporta `POST` ni body JSON. Usar `fetch()` con `response.body.getReader()` como en el ejemplo. Funciona en todos los browsers modernos (Chrome 94+, Firefox 102+, Safari 16+).

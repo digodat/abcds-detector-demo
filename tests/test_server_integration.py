@@ -182,6 +182,129 @@ def test_evaluate_endpoint_calls_execute(monkeypatch):
   assert data["assessments"][0]["long_form_abcd"][0]["detected"] is True
 
 
+def test_language_field_defaults_to_en():
+  """EvaluateRequest should default to EN when language is not specified."""
+  from api_models import EvaluateRequest
+
+  req = EvaluateRequest(
+      video_uris=["gs://bucket/video.mp4"],
+      bucket_name="my-bucket",
+  )
+  assert req.language == "EN"
+
+
+def test_language_field_accepts_es():
+  """EvaluateRequest should accept ES as a valid language."""
+  from api_models import EvaluateRequest
+
+  req = EvaluateRequest(
+      video_uris=["gs://bucket/video.mp4"],
+      bucket_name="my-bucket",
+      language="ES",
+  )
+  assert req.language == "ES"
+
+
+def test_language_field_rejects_invalid_value():
+  """EvaluateRequest should reject unsupported language codes."""
+  from pydantic import ValidationError
+  from api_models import EvaluateRequest
+
+  with pytest.raises(ValidationError):
+    EvaluateRequest(
+        video_uris=["gs://bucket/video.mp4"],
+        bucket_name="my-bucket",
+        language="FR",
+    )
+
+
+def test_prompt_includes_language_instruction_en():
+  """get_abcds_prompt_config should include English instruction when language is EN."""
+  from prompts.prompt_generator import PromptGenerator
+  from configuration import Configuration
+
+  config = Configuration()
+  config.language = "EN"
+  pg = PromptGenerator()
+  prompt_config = pg.get_abcds_prompt_config([], config)
+
+  assert "exclusively in English" in prompt_config.system_instructions
+
+
+def test_prompt_includes_language_instruction_es():
+  """get_abcds_prompt_config should include Spanish instruction when language is ES."""
+  from prompts.prompt_generator import PromptGenerator
+  from configuration import Configuration
+
+  config = Configuration()
+  config.language = "ES"
+  pg = PromptGenerator()
+  prompt_config = pg.get_abcds_prompt_config([], config)
+
+  assert "exclusivamente en español" in prompt_config.system_instructions
+
+
+def test_per_video_error_continues_batch():
+  """A failing video should produce an error assessment, not abort the batch."""
+  from main import execute_abcd_assessment_for_videos
+
+  config = make_mock_config()
+  config.set_videos(["gs://bucket/good.mp4", "gs://bucket/bad.mp4"])
+
+  mock_feature = MagicMock(spec=models.FeatureEvaluation)
+
+  def evaluate_side_effect(**kwargs):
+    if "bad.mp4" in kwargs.get("video_uri", ""):
+      raise RuntimeError("GCS read error")
+    return [mock_feature]
+
+  with patch(
+      "main.video_evaluation_service.video_evaluation_service.evaluate_features",
+      side_effect=evaluate_side_effect,
+  ), patch("main.generic_helpers.trim_video"), patch(
+      "main.generic_helpers.print_abcd_assessment"
+  ), patch(
+      "main.generic_helpers.remove_local_video_files"
+  ), patch(
+      "main.annotations_generation.generate_video_annotations"
+  ), patch(
+      "main.creative_provider_registry.provider_factory.get_provider"
+  ) as mock_provider:
+    mock_provider.return_value.get_creative_uris.return_value = [
+        "gs://bucket/good.mp4",
+        "gs://bucket/bad.mp4",
+    ]
+    result = execute_abcd_assessment_for_videos(config)
+
+  assert len(result) == 2
+  assert result[0].error is None
+  assert result[1].error == "GCS read error"
+  assert result[1].long_form_abcd_evaluated_features == []
+
+
+def test_provider_mismatch_produces_error_assessment():
+  """A GCS provider with a YouTube URI should produce an error assessment, not abort silently."""
+  from main import execute_abcd_assessment_for_videos
+
+  config = make_mock_config()
+  config.set_videos(["https://www.youtube.com/watch?v=abc123"])
+
+  with patch(
+      "main.generic_helpers.remove_local_video_files"
+  ), patch(
+      "main.creative_provider_registry.provider_factory.get_provider"
+  ) as mock_provider:
+    mock_provider.return_value.get_creative_uris.return_value = [
+        "https://www.youtube.com/watch?v=abc123"
+    ]
+    result = execute_abcd_assessment_for_videos(config)
+
+  assert len(result) == 1
+  assert result[0].error is not None
+  assert "GCS" in result[0].error
+  assert result[0].long_form_abcd_evaluated_features == []
+
+
 def test_feature_evaluation_response_serialization():
   """FeatureEvaluationResponse should serialize correctly from a FeatureEvaluation."""
   from api_models import FeatureEvaluationResponse

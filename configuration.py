@@ -76,6 +76,9 @@ class Configuration:
     # set llm params
     self.llm_params: LLMParameters = LLMParameters()
 
+    # output language for LLM text fields ("EN" or "ES")
+    self.language: str = "EN"
+
     # optional callback for streaming progress events (used by /evaluate/stream)
     self.progress_callback: Callable[[dict], None] | None = None
 
@@ -103,6 +106,7 @@ class Configuration:
       features_to_evaluate: list[str],
       creative_provider_type: CreativeProviderType,
       verbose: bool,
+      language: str = "EN",
   ) -> None:
     """Set the required parameters for ABCD to run.
 
@@ -141,6 +145,7 @@ class Configuration:
     if creative_provider_type == CreativeProviderType.YOUTUBE.value:
       self.creative_provider_type = CreativeProviderType.YOUTUBE
 
+    self.language = language if language in ("EN", "ES") else "EN"
     self.annotation_path = f"gs://{bucket_name}/ABCD/"
 
   def set_videos(self, video_uris: list) -> None:

@@ -57,114 +57,126 @@ def execute_abcd_assessment_for_videos(
 
     _emit(config, {"type": "video_start", "video_uri": video_uri, "index": idx + 1, "total": len(video_uris)})
 
-    # Validate that creative provides match the video uris
-    if (
-        config.creative_provider_type == models.CreativeProviderType.GCS
-        and "gs://" not in video_uri
-    ):
-      logging.error(
-          "The creative provider GCS does not match with the video uri"
-          f" {video_uri}. Stopping execution. Please check."
-      )
-      break
+    try:
+      # Validate that creative provider matches the video URI format
+      if (
+          config.creative_provider_type == models.CreativeProviderType.GCS
+          and "gs://" not in video_uri
+      ):
+        raise ValueError(
+            f"Provider type GCS does not match video URI '{video_uri}'."
+            " Use a gs:// URI or set creative_provider_type to 'YOUTUBE'."
+        )
 
-    if (
-        config.creative_provider_type == models.CreativeProviderType.YOUTUBE
-        and "https://www.youtube.com" not in video_uri
-    ):
-      logging.error(
-          "The creative provider YOUTUBE does not match with the video uri"
-          f" {video_uri}. Stopping execution. Please check."
-      )
-      break
+      if (
+          config.creative_provider_type == models.CreativeProviderType.YOUTUBE
+          and "https://www.youtube.com" not in video_uri
+      ):
+        raise ValueError(
+            f"Provider type YOUTUBE does not match video URI '{video_uri}'."
+            " Use a YouTube URL or set creative_provider_type to 'GCS'."
+        )
 
-    print(f"\n\nProcessing ABCD Assessment for video {video_uri}... \n")
+      print(f"\n\nProcessing ABCD Assessment for video {video_uri}... \n")
 
-    # Generate video annotations for custom features. Annotations are supported only for GCS providers
-    if (
-        config.use_annotations
-        and config.creative_provider_type == models.CreativeProviderType.GCS
-    ):
-      _emit(config, {"type": "step", "step": "annotations", "status": "running", "video_uri": video_uri})
-      annotations_generation.generate_video_annotations(config, video_uri)
-      _emit(config, {"type": "step", "step": "annotations", "status": "done", "video_uri": video_uri})
+      # Generate video annotations for custom features. Annotations are supported only for GCS providers
+      if (
+          config.use_annotations
+          and config.creative_provider_type == models.CreativeProviderType.GCS
+      ):
+        _emit(config, {"type": "step", "step": "annotations", "status": "running", "video_uri": video_uri})
+        annotations_generation.generate_video_annotations(config, video_uri)
+        _emit(config, {"type": "step", "step": "annotations", "status": "done", "video_uri": video_uri})
 
-    # Full ABCD features require 1st_5_secs videos only for GCS providers
-    if (
-        config.run_long_form_abcd
-        and config.creative_provider_type == models.CreativeProviderType.GCS
-    ):
-      _emit(config, {"type": "step", "step": "trim", "status": "running", "video_uri": video_uri})
-      generic_helpers.trim_video(config, video_uri)
-      _emit(config, {"type": "step", "step": "trim", "status": "done", "video_uri": video_uri})
+      # Full ABCD features require 1st_5_secs videos only for GCS providers
+      if (
+          config.run_long_form_abcd
+          and config.creative_provider_type == models.CreativeProviderType.GCS
+      ):
+        _emit(config, {"type": "step", "step": "trim", "status": "running", "video_uri": video_uri})
+        generic_helpers.trim_video(config, video_uri)
+        _emit(config, {"type": "step", "step": "trim", "status": "done", "video_uri": video_uri})
 
-    # Execute ABCD Assessment
-    long_form_abcd_evaluated_features: models.FeatureEvaluation = []
-    shorts_evaluated_features: models.FeatureEvaluation = []
+      # Execute ABCD Assessment
+      long_form_abcd_evaluated_features: models.FeatureEvaluation = []
+      shorts_evaluated_features: models.FeatureEvaluation = []
 
-    if config.run_long_form_abcd:
-      _emit(config, {"type": "step", "step": "long_form_abcd", "status": "running", "video_uri": video_uri})
-      long_form_abcd_evaluated_features = (
-          video_evaluation_service.video_evaluation_service.evaluate_features(
-              config=config,
-              video_uri=video_uri,
-              features_category=models.VideoFeatureCategory.LONG_FORM_ABCD,
-          )
-      )
-      _emit(config, {"type": "step", "step": "long_form_abcd", "status": "done", "video_uri": video_uri})
+      if config.run_long_form_abcd:
+        _emit(config, {"type": "step", "step": "long_form_abcd", "status": "running", "video_uri": video_uri})
+        long_form_abcd_evaluated_features = (
+            video_evaluation_service.video_evaluation_service.evaluate_features(
+                config=config,
+                video_uri=video_uri,
+                features_category=models.VideoFeatureCategory.LONG_FORM_ABCD,
+            )
+        )
+        _emit(config, {"type": "step", "step": "long_form_abcd", "status": "done", "video_uri": video_uri})
 
-    if config.run_shorts:
-      _emit(config, {"type": "step", "step": "shorts", "status": "running", "video_uri": video_uri})
-      shorts_evaluated_features = (
-          video_evaluation_service.video_evaluation_service.evaluate_features(
-              config=config,
-              video_uri=video_uri,
-              features_category=models.VideoFeatureCategory.SHORTS,
-          )
-      )
-      _emit(config, {"type": "step", "step": "shorts", "status": "done", "video_uri": video_uri})
+      if config.run_shorts:
+        _emit(config, {"type": "step", "step": "shorts", "status": "running", "video_uri": video_uri})
+        shorts_evaluated_features = (
+            video_evaluation_service.video_evaluation_service.evaluate_features(
+                config=config,
+                video_uri=video_uri,
+                features_category=models.VideoFeatureCategory.SHORTS,
+            )
+        )
+        _emit(config, {"type": "step", "step": "shorts", "status": "done", "video_uri": video_uri})
 
-    video_assessment: models.VideoAssessment = models.VideoAssessment(
-        brand_name=config.brand_name,
-        video_uri=video_uri,
-        long_form_abcd_evaluated_features=long_form_abcd_evaluated_features,
-        shorts_evaluated_features=shorts_evaluated_features,
-        config=config,
-    )
-
-    assessments.append(video_assessment)
-
-    # Print assessments for Full ABCD and Shorts and store results
-    if len(long_form_abcd_evaluated_features) > 0:
-      generic_helpers.print_abcd_assessment(
-          video_assessment.brand_name,
-          video_assessment.video_uri,
-          long_form_abcd_evaluated_features,
-      )
-    else:
-      logging.info(
-          "There are not Full ABCD evaluated features results to display."
-      )
-    if len(shorts_evaluated_features) > 0:
-      generic_helpers.print_abcd_assessment(
-          video_assessment.brand_name,
-          video_assessment.video_uri,
-          shorts_evaluated_features,
-      )
-    else:
-      logging.info(
-          "There are not Shorts evaluated features results to display."
+      video_assessment: models.VideoAssessment = models.VideoAssessment(
+          brand_name=config.brand_name,
+          video_uri=video_uri,
+          long_form_abcd_evaluated_features=long_form_abcd_evaluated_features,
+          shorts_evaluated_features=shorts_evaluated_features,
+          config=config,
       )
 
-    if config.bq_table_name:
-      _emit(config, {"type": "step", "step": "bigquery", "status": "running", "video_uri": video_uri})
-      generic_helpers.store_in_bq(config, video_assessment)
-      _emit(config, {"type": "step", "step": "bigquery", "status": "done", "video_uri": video_uri})
+      assessments.append(video_assessment)
 
-    # Remove local version of video files
-    generic_helpers.remove_local_video_files(config)
+      # Print assessments for Full ABCD and Shorts and store results
+      if len(long_form_abcd_evaluated_features) > 0:
+        generic_helpers.print_abcd_assessment(
+            video_assessment.brand_name,
+            video_assessment.video_uri,
+            long_form_abcd_evaluated_features,
+        )
+      else:
+        logging.info(
+            "There are not Full ABCD evaluated features results to display."
+        )
+      if len(shorts_evaluated_features) > 0:
+        generic_helpers.print_abcd_assessment(
+            video_assessment.brand_name,
+            video_assessment.video_uri,
+            shorts_evaluated_features,
+        )
+      else:
+        logging.info(
+            "There are not Shorts evaluated features results to display."
+        )
 
-    _emit(config, {"type": "video_done", "video_uri": video_uri, "index": idx + 1, "total": len(video_uris)})
+      if config.bq_table_name:
+        _emit(config, {"type": "step", "step": "bigquery", "status": "running", "video_uri": video_uri})
+        generic_helpers.store_in_bq(config, video_assessment)
+        _emit(config, {"type": "step", "step": "bigquery", "status": "done", "video_uri": video_uri})
+
+      # Remove local version of video files
+      generic_helpers.remove_local_video_files(config)
+
+      _emit(config, {"type": "video_done", "video_uri": video_uri, "index": idx + 1, "total": len(video_uris)})
+
+    except Exception as ex:
+      logging.error("Error processing video %s: %s", video_uri, ex)
+      generic_helpers.remove_local_video_files(config)
+      assessments.append(models.VideoAssessment(
+          brand_name=config.brand_name,
+          video_uri=video_uri,
+          long_form_abcd_evaluated_features=[],
+          shorts_evaluated_features=[],
+          config=config,
+          error=str(ex),
+      ))
+      _emit(config, {"type": "video_error", "video_uri": video_uri, "index": idx + 1, "total": len(video_uris), "detail": str(ex)})
 
   config.cleanup()
   return assessments

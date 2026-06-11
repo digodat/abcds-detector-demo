@@ -51,6 +51,7 @@ def _setup_config(
       features_to_evaluate=request.features_to_evaluate,
       creative_provider_type=request.creative_provider_type,
       verbose=False,
+      language=request.language,
   )
   config.set_videos(request.video_uris)
   config.set_brand_details(
@@ -113,12 +114,11 @@ def evaluate(request: EvaluateRequest):
   finally:
     config.cleanup()
 
-  return EvaluateResponse(
-      status="success",
-      assessments=[
-          VideoAssessmentResponse.from_video_assessment(a) for a in assessments
-      ],
-  )
+  assessment_responses = [
+      VideoAssessmentResponse.from_video_assessment(a) for a in assessments
+  ]
+  status = "partial" if any(a.error for a in assessment_responses) else "success"
+  return EvaluateResponse(status=status, assessments=assessment_responses)
 
 
 @app.post("/evaluate/stream")
@@ -153,15 +153,16 @@ async def evaluate_stream(request: EvaluateRequest):
   def run_in_thread() -> None:
     try:
       assessments = execute_abcd_assessment_for_videos(config)
+      assessment_responses = [
+          VideoAssessmentResponse.from_video_assessment(a) for a in assessments
+      ]
+      stream_status = "partial" if any(a.error for a in assessment_responses) else "success"
       loop.call_soon_threadsafe(
           event_queue.put_nowait,
           {
               "type": "done",
-              "status": "success",
-              "assessments": [
-                  VideoAssessmentResponse.from_video_assessment(a).model_dump(mode="json")
-                  for a in assessments
-              ],
+              "status": stream_status,
+              "assessments": [a.model_dump(mode="json") for a in assessment_responses],
           },
       )
     except Exception as ex:
