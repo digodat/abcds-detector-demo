@@ -22,6 +22,7 @@
 
 import time
 import json
+import functools
 import vertexai
 import vertexai.preview.generative_models as generative_models
 from vertexai.preview.generative_models import GenerativeModel, Part, GenerationConfig
@@ -36,6 +37,19 @@ from models import LLMParameters
 DEFAULT_CONFIG = LLMParameters()
 
 
+@functools.lru_cache(maxsize=8)
+def _get_genai_client(project_id: str, location: str) -> genai.Client:
+  """Returns a cached GenAI client per (project, location).
+
+  Reusing the client avoids recreating its gRPC connection pool on every call
+  and retry. Cached by location because it is configurable per request; the
+  small bound keeps the handful of real (project, location) clients alive
+  without growing unbounded. The client is thread-safe for generate_content,
+  so it is shared across the evaluation thread pool.
+  """
+  return genai.Client(vertexai=True, project=project_id, location=location)
+
+
 class GeminiAPIService:
   """Gemini API Service to leverage the Vertex APIs for inference"""
 
@@ -48,47 +62,40 @@ class GeminiAPIService:
     """Executes Gemini using the GenAI library"""
     if not llm_params:
       llm_params = DEFAULT_CONFIG
+    # Reuse a cached client across calls/retries instead of recreating it
+    client = _get_genai_client(self.project_id, llm_params.location)
+    # Build the request once; it does not change across retries.
+    contents = self._get_modality_params_genai(prompt_config.prompt, llm_params)
+    generate_content_config = types.GenerateContentConfig(
+        temperature=llm_params.generation_config.get("temperature"),
+        top_p=llm_params.generation_config.get("top_p"),
+        seed=0,
+        max_output_tokens=llm_params.generation_config.get("max_output_tokens"),
+        response_modalities=["TEXT"],  # Just text for now
+        safety_settings=[
+            types.SafetySetting(
+                category="HARM_CATEGORY_HATE_SPEECH", threshold="OFF"
+            ),
+            types.SafetySetting(
+                category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="OFF"
+            ),
+            types.SafetySetting(
+                category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"
+            ),
+            types.SafetySetting(
+                category="HARM_CATEGORY_HARASSMENT", threshold="OFF"
+            ),
+        ],
+        system_instruction=[
+            types.Part.from_text(text=prompt_config.system_instructions)
+        ],
+        response_mime_type="application/json",
+        response_schema=llm_params.generation_config.get("response_schema"),
+    )
     # Retry call for retriable errors
     retries = 3
     for this_retry in range(retries):
       try:
-        client = genai.Client(
-            vertexai=True,
-            project=self.project_id,
-            location=llm_params.location,
-        )
-        # Build prompt parts
-        contents = self._get_modality_params_genai(
-            prompt_config.prompt, llm_params
-        )
-        generate_content_config = types.GenerateContentConfig(
-            temperature=llm_params.generation_config.get("temperature"),
-            top_p=llm_params.generation_config.get("top_p"),
-            seed=0,
-            max_output_tokens=llm_params.generation_config.get(
-                "max_output_tokens"
-            ),
-            response_modalities=["TEXT"],  # Just text for now
-            safety_settings=[
-                types.SafetySetting(
-                    category="HARM_CATEGORY_HATE_SPEECH", threshold="OFF"
-                ),
-                types.SafetySetting(
-                    category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="OFF"
-                ),
-                types.SafetySetting(
-                    category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"
-                ),
-                types.SafetySetting(
-                    category="HARM_CATEGORY_HARASSMENT", threshold="OFF"
-                ),
-            ],
-            system_instruction=[
-                types.Part.from_text(text=prompt_config.system_instructions)
-            ],
-            response_mime_type="application/json",
-            response_schema=llm_params.generation_config.get("response_schema"),
-        )
         # Get response from Gemini
         response = client.models.generate_content(
             model=llm_params.model_name,

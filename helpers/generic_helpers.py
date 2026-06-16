@@ -26,10 +26,8 @@ import urllib.parse
 import urllib.request
 import datetime
 from concurrent.futures import ThreadPoolExecutor
-import pandas
 import logging
 from google.cloud import bigquery
-from moviepy.editor import VideoFileClip
 from gcp_api_services import bigquery_api_service
 from gcp_api_services import gcs_api_service
 from configuration import Configuration
@@ -98,17 +96,17 @@ def trim_video(config: Configuration, video_uri: str):
   if reduced_blob is None:
     print(f"Shortening video {video_uri}. \n")
 
-    # download
-    with open(config.ffmpeg_buffer, "wb") as f:
-      blob = gcs_api_service.gcs_api_service.get_blob(video_uri)
-      if blob:
-        f.write(blob.download_as_string(client=None))
-      else:
-        msg = f"Video URI: {video_uri} does not exist. Skipping execution."
-        logging.error(msg)
-        raise ValueError(msg)
+    # download: stream to disk to avoid loading the whole video into memory
+    blob = gcs_api_service.gcs_api_service.get_blob(video_uri)
+    if not blob:
+      msg = f"Video URI: {video_uri} does not exist. Skipping execution."
+      logging.error(msg)
+      raise ValueError(msg)
+    blob.download_to_filename(config.ffmpeg_buffer)
 
-    # trim
+    # trim. Import moviepy lazily to keep it out of the startup baseline.
+    from moviepy.editor import VideoFileClip
+
     source_clip = VideoFileClip(config.ffmpeg_buffer)
     try:
       source_clip.subclip(0, 5).write_videofile(config.ffmpeg_buffer_reduced)
@@ -395,6 +393,9 @@ def store_in_bq(
 ):
   """Store ABCD assessment results in BQ"""
 
+  # Import pandas lazily to keep it out of the startup baseline.
+  import pandas
+
   print(
       f"Storing ABCD assessment for video {video_assessment.video_uri} in"
       " BigQuery... \n"
@@ -500,10 +501,15 @@ def build_features_for_bq(
   return assessment_bq
 
 
-def execute_tasks_in_parallel(tasks: list[any]) -> None:
-  """Executes a list of tasks in parallel"""
+def execute_tasks_in_parallel(tasks: list[any], max_workers: int = 4) -> None:
+  """Executes a list of tasks in parallel.
+
+  max_workers caps concurrency to bound peak memory (each task holds an LLM
+  client and its response). Tasks are I/O-bound (waiting on Gemini), so a small
+  pool keeps throughput while avoiding memory spikes on constrained instances.
+  """
   results = []
-  with ThreadPoolExecutor() as executor:
+  with ThreadPoolExecutor(max_workers=max_workers) as executor:
     running_tasks = [executor.submit(task) for task in tasks]
     for running_task in running_tasks:
       results.append(running_task.result())
