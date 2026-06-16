@@ -34,8 +34,10 @@ class GCSCreativeProvider:
   def __init__(self):
     pass
 
-  def get_creative_uris(self, config: configuration.Configuration) -> any:
+  def get_creative_uris(self, config: configuration.Configuration) -> list[str]:
     """Expands any GCS URI entry that is a folder path into its files."""
+    uris: list[str] = []
+
     for uri in config.video_uris:
       if uri.endswith("/"):
         print(f"EXPANDING URI: {uri} \n")
@@ -46,6 +48,8 @@ class GCSCreativeProvider:
             .list_blobs(prefix=prefix, delimiter="/")
         ):
           if not blob.name.endswith("/"):
-            yield f"gs://{bucket}/{blob.name}"
+            uris.append(f"gs://{bucket}/{blob.name}")
       else:
-        yield uri
+        uris.append(uri)
+
+    return uris

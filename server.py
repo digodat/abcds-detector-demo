@@ -180,7 +180,12 @@ async def evaluate_stream(request: EvaluateRequest):
   async def event_generator():
     try:
       while True:
-        event = await event_queue.get()
+        try:
+          event = await asyncio.wait_for(event_queue.get(), timeout=25.0)
+        except asyncio.TimeoutError:
+          yield ": keepalive\n\n"
+          continue
+
         if event is None:
           break
         yield f"data: {json.dumps(event)}\n\n"
