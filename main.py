@@ -49,7 +49,7 @@ def execute_abcd_assessment_for_videos(
       )
   )
 
-  video_uris = creative_provider.get_creative_uris(config)
+  video_uris = list(creative_provider.get_creative_uris(config))
 
   assessments: list[models.VideoAssessment] = []
 
