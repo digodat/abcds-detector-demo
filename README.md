@@ -189,19 +189,35 @@ GET /health
 ```
 POST /evaluate
 Content-Type: application/json
-
-{
-  "video_uris": ["gs://my-bucket/video.mp4"],
-  "bucket_name": "my-bucket",
-  "project_id": "my-gcp-project",      // optional: inferred from ADC if omitted
-  "brand_name": "My Brand",            // optional if extract_brand_metadata=true
-  "use_llms": true,
-  "use_annotations": false,
-  "run_long_form_abcd": true,
-  "run_shorts": false,
-  "extract_brand_metadata": true
-}
 ```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `video_uris` | `string[]` | **required** | GCS URIs (`gs://...`) or YouTube URLs |
+| `bucket_name` | `string` | **required** | GCS bucket for temporary files |
+| `project_id` | `string` | inferred from ADC | GCP project ID |
+| `project_zone` | `string` | `"us-central1"` | GCP region |
+| `knowledge_graph_api_key` | `string` | `""` | Can also be set via `KG_API_KEY` env var |
+| `brand_name` | `string` | `null` | Required if `extract_brand_metadata=false` |
+| `brand_variations` | `string` | `""` | Comma-separated brand name variants |
+| `branded_products` | `string` | `""` | Product names to detect |
+| `branded_products_categories` | `string` | `""` | Product categories |
+| `branded_call_to_actions` | `string` | `""` | Expected CTAs in the video |
+| `extract_brand_metadata` | `boolean` | `true` | Auto-extract brand info with LLM |
+| `use_llms` | `boolean` | `true` | Enable Gemini evaluation |
+| `use_annotations` | `boolean` | `false` | Enable Video Intelligence API annotations |
+| `run_long_form_abcd` | `boolean` | `true` | Evaluate ABCDs long-form features |
+| `run_shorts` | `boolean` | `true` | Evaluate YouTube Shorts features |
+| `features_to_evaluate` | `string[]` | `[]` | Feature IDs to run (empty = all features) |
+| `creative_provider_type` | `string` | `"GCS"` | `"GCS"` or `"YOUTUBE"` |
+| `language` | `string` | `"EN"` | Output language for LLM text fields: `"EN"` or `"ES"` |
+| `bigquery_dataset` | `string` | `"abcd_detector_ds"` | BQ dataset to store results (optional) |
+| `bigquery_table` | `string` | `""` | BQ table to store results (optional) |
+| `llm_name` | `string` | `"gemini-2.5-pro"` | Vertex AI model name |
+| `llm_location` | `string` | `"us-central1"` | Vertex AI region |
+| `max_output_tokens` | `integer` | `65535` | Max tokens per LLM response |
+| `temperature` | `float` | `1.0` | LLM temperature |
+| `top_p` | `float` | `0.95` | LLM top-p sampling |
 
 Response:
 ```json
@@ -215,6 +231,9 @@ Response:
         {
           "feature_id": "a_dynamic_start",
           "feature_name": "Dynamic Start",
+          "category": "LONG_FORM_ABCD",
+          "sub_category": "ATTRACT",
+          "video_segment": "FULL_VIDEO",
           "detected": true,
           "confidence_score": 0.9,
           "rationale": "...",
@@ -223,10 +242,38 @@ Response:
           "weaknesses": "..."
         }
       ],
-      "shorts": []
+      "shorts": [],
+      "error": null
     }
   ]
 }
+```
+
+`status` is `"success"` when all videos evaluated without errors, or `"partial"` when at least one video failed (check each item's `error` field). Feature `category` values: `LONG_FORM_ABCD`, `SHORTS`. `sub_category` values: `ATTRACT`, `BRAND`, `CONNECT`, `DIRECT`. `video_segment` values: `FULL_VIDEO`, `FIRST_5_SECS_VIDEO`, `LAST_5_SECS_VIDEO`, `NO_GROUPING`.
+
+---
+
+**Evaluate videos (streaming)**
+```
+POST /evaluate/stream
+Content-Type: application/json
+```
+
+Same request body as `POST /evaluate`. Returns a `text/event-stream` (SSE) response that emits progress events during evaluation and a final `done` or `error` event.
+
+Event types:
+
+| `type` | Description |
+|--------|-------------|
+| `progress` | Intermediate progress update (emitted per video/feature) |
+| `done` | Evaluation complete — includes `status` and `assessments` (same schema as `/evaluate`) |
+| `error` | Fatal error — includes `detail` string |
+
+Example events:
+```
+data: {"type": "progress", "message": "Evaluating Dynamic Start..."}
+
+data: {"type": "done", "status": "success", "assessments": [...]}
 ```
 
 Interactive API docs are available at `<service-url>/docs` once deployed.
