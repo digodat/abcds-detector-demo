@@ -16,13 +16,9 @@ class GCSAPIService:
 
   def get_annotation_uri(self, config: Configuration, video_uri: str) -> str:
     """Helper to translate video to annotation uri."""
-    # TODO (ae) this does not work with 1st_5_secs URLs
-    uri = (
-        video_uri.replace("gs://", config.annotation_path).replace(".", "_")
-        + "/"
-    )
-
-    return uri
+    bucket, path = video_uri.replace("gs://", "").split("/", 1)
+    sanitized_path = path.replace(".", "_")
+    return f"gs://{bucket}/ABCD/{sanitized_path}/"
 
   def get_reduced_uri(self, config: Configuration, video_uri: str) -> str:
     """Helper to translate video to reduced video uri."""
@@ -31,12 +27,12 @@ class GCSAPIService:
   def get_blob(self, uri: str) -> any:
     """Return GCS blob object from full uri."""
     bucket, path = uri.replace("gs://", "").split("/", 1)
-    return self.client.get_bucket(bucket).get_blob(path)
+    return self.client.bucket(bucket).get_blob(path)
 
   def upload_blob(self, uri: str, file_path: str) -> any:
     """Uploads GCS blob object from file."""
     bucket, path = uri.replace("gs://", "").split("/", 1)
-    self.client.get_bucket(bucket).blob(path).upload_from_filename(file_path)
+    self.client.bucket(bucket).blob(path).upload_from_filename(file_path)
 
   def load_blob(self, annotation_uri: str):
     """Loads a blob to json"""

@@ -44,7 +44,7 @@ class GCSCreativeProvider:
         bucket, prefix = uri.replace("gs://", "").split("/", 1)
         for blob in (
             gcs_api_service.gcs_api_service.get_client()
-            .get_bucket(bucket)
+            .bucket(bucket)
             .list_blobs(prefix=prefix, delimiter="/")
         ):
           if not blob.name.endswith("/"):
