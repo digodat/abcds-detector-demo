@@ -146,7 +146,7 @@ class Configuration:
       self.creative_provider_type = CreativeProviderType.YOUTUBE
 
     self.language = language if language in ("EN", "ES") else "EN"
-    self.annotation_path = f"gs://{bucket_name}/ABCD/"
+    self.annotation_path = f"gs://{bucket_name}/processed/"
 
   def set_videos(self, video_uris: list) -> None:
     """Set the videos that will be processed.

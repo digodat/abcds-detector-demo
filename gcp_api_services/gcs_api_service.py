@@ -18,7 +18,7 @@ class GCSAPIService:
     """Helper to translate video to annotation uri."""
     bucket, path = video_uri.replace("gs://", "").split("/", 1)
     sanitized_path = path.replace(".", "_")
-    return f"gs://{bucket}/ABCD/{sanitized_path}/"
+    return f"gs://{bucket}/processed/{sanitized_path}/"
 
   def get_reduced_uri(self, config: Configuration, video_uri: str) -> str:
     """Helper to translate video to reduced video uri."""
