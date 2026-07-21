@@ -79,10 +79,20 @@ def execute_abcd_assessment_for_videos(
 
       print(f"\n\nProcessing ABCD Assessment for video {video_uri}... \n")
 
-      # Generate video annotations for custom features. Annotations are supported only for GCS providers
+      # Generate video annotations for custom features.
+      # Annotations are only useful for long-form ABCD on GCS providers: exactly 4
+      # long-form features use annotation-based detectors (detect_dynamic_start,
+      # detect_quick_pacing, detect_quick_pacing_1st_5_secs, detect_overall_pacing),
+      # all pacing/shot-change based. Shorts have ZERO annotation-based features and
+      # YouTube is not supported by Video Intelligence. Running the ~13min Video
+      # Intelligence pass for a shorts-only or YouTube request is pure cost with no
+      # benefit, so we also gate on run_long_form_abcd. This mirrors the frontend
+      # decision and protects direct API callers.
+      # NOTE: if annotation-based features are ever added to shorts, relax this guard.
       if (
           config.use_annotations
           and config.creative_provider_type == models.CreativeProviderType.GCS
+          and config.run_long_form_abcd
       ):
         _emit(config, {"type": "step", "step": "annotations", "status": "running", "video_uri": video_uri})
         annotations_generation.generate_video_annotations(config, video_uri)
