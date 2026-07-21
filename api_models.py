@@ -42,6 +42,11 @@ class EvaluateRequest(BaseModel):
   # Output language
   language: Literal["EN", "ES"] = "EN"
 
+  # BCP-47 language code for Speech Transcription (Video Intelligence API).
+  # Independent from `language`, which only controls LLM output text.
+  # Examples: "es-ES", "es-419", "en-US". Only relevant when use_annotations=true.
+  audio_language_code: Optional[str] = "en-US"
+
   # LLM params
   llm_name: Optional[str] = "gemini-2.5-pro"
   llm_location: Optional[str] = "us-central1"

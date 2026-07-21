@@ -104,6 +104,7 @@ def test_evaluate_request_defaults():
   assert req.use_annotations is False
   assert req.extract_brand_metadata is True
   assert req.creative_provider_type == "GCS"
+  assert req.audio_language_code == "en-US"
 
 
 def test_evaluate_request_requires_video_uris():

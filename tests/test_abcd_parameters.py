@@ -43,6 +43,7 @@ class ArgsMock:
   features_to_evaluate: str
   creative_provider_type: str
   verbose: bool
+  audio_language_code: str
   # set videos
   video_uris: str
   # set brand
@@ -85,6 +86,7 @@ def test_not_empty_abcd_params():
       features_to_evaluate="",
       creative_provider_type="GCS",
       verbose=True,
+      audio_language_code="en-US",
       video_uris="gs://abcd-detector-input/Google/videos/",
       brand_name="Google",
       brand_variations="Google,google",
@@ -117,6 +119,7 @@ def test_not_empty_abcd_params():
   assert config.use_llms is not None
   assert config.verbose is not None
   assert config.annotation_path is not None
+  assert config.audio_language_code == "en-US"
 
   # set videos
   assert config.video_uris is not None

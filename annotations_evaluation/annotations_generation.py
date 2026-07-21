@@ -118,7 +118,7 @@ def generate_video_annotations(config: Configuration, video_uri: str) -> None:
 
   # Speech Detection
   speech_config = videointelligence.SpeechTranscriptionConfig(
-      language_code="en-US", enable_automatic_punctuation=True
+      language_code=config.audio_language_code, enable_automatic_punctuation=True
   )
   speech_context = videointelligence.VideoContext(
       speech_transcription_config=speech_config

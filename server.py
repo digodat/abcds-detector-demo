@@ -52,6 +52,7 @@ def _setup_config(
       creative_provider_type=request.creative_provider_type,
       verbose=False,
       language=request.language,
+      audio_language_code=request.audio_language_code,
   )
   config.set_videos(request.video_uris)
   config.set_brand_details(

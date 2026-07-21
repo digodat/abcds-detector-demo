@@ -79,6 +79,9 @@ class Configuration:
     # output language for LLM text fields ("EN" or "ES")
     self.language: str = "EN"
 
+    # BCP-47 language code for Speech Transcription (Video Intelligence API)
+    self.audio_language_code: str = "en-US"
+
     # optional callback for streaming progress events (used by /evaluate/stream)
     self.progress_callback: Callable[[dict], None] | None = None
 
@@ -107,6 +110,7 @@ class Configuration:
       creative_provider_type: CreativeProviderType,
       verbose: bool,
       language: str = "EN",
+      audio_language_code: str = "en-US",
   ) -> None:
     """Set the required parameters for ABCD to run.
 
@@ -123,6 +127,9 @@ class Configuration:
       use_annotations: Use video annotation AI.
       use_llms: Use LLM AI.
       verbose: Turn on extra debug and execution prints.
+      audio_language_code: BCP-47 language code for Speech Transcription
+        in Video Intelligence annotations (e.g. "es-ES", "es-419", "en-US").
+        Independent from language.
     """
     self.project_id = project_id
     self.project_zone = project_zone or "us-central1"
@@ -146,6 +153,7 @@ class Configuration:
       self.creative_provider_type = CreativeProviderType.YOUTUBE
 
     self.language = language if language in ("EN", "ES") else "EN"
+    self.audio_language_code = audio_language_code or "en-US"
     self.annotation_path = f"gs://{bucket_name}/processed/"
 
   def set_videos(self, video_uris: list) -> None:

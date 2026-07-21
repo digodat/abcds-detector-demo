@@ -211,6 +211,7 @@ Content-Type: application/json
 | `features_to_evaluate` | `string[]` | `[]` | Feature IDs to run (empty = all features) |
 | `creative_provider_type` | `string` | `"GCS"` | `"GCS"` or `"YOUTUBE"` |
 | `language` | `string` | `"EN"` | Output language for LLM text fields: `"EN"` or `"ES"` |
+| `audio_language_code` | `string` | `"en-US"` | BCP-47 language code for Speech Transcription in Video Intelligence annotations (e.g. `"es-ES"`, `"es-419"`, `"en-US"`). Independent from `language`, which only controls the LLM output text language. Only relevant when `use_annotations=true`. |
 | `bigquery_dataset` | `string` | `"abcd_detector_ds"` | BQ dataset to store results (optional) |
 | `bigquery_table` | `string` | `""` | BQ table to store results (optional) |
 | `llm_name` | `string` | `"gemini-2.5-pro"` | Vertex AI model name |
@@ -218,6 +219,10 @@ Content-Type: application/json
 | `max_output_tokens` | `integer` | `65535` | Max tokens per LLM response |
 | `temperature` | `float` | `1.0` | LLM temperature |
 | `top_p` | `float` | `0.95` | LLM top-p sampling |
+
+When `use_annotations` is enabled, Speech Transcription previously used a fixed
+`"en-US"` language code. Pass `audio_language_code` (for example `"es-419"` or
+`"es-ES"`) so Video Intelligence can transcribe non-English audio correctly.
 
 Response:
 ```json

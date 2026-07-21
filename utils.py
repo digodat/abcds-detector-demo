@@ -51,6 +51,7 @@ def build_abcd_params_config(args: any) -> Configuration:
       features_to_evaluate=args.features_to_evaluate.split(",") if args.features_to_evaluate else [],
       creative_provider_type=args.creative_provider_type,
       verbose=args.verbose,
+      audio_language_code=args.audio_language_code,
   )
   config.set_videos(args.video_uris)
   config.set_brand_details(
@@ -213,6 +214,15 @@ def parse_args(arg_list: list[str] | None = None) -> None:
       help="Use Annotations for the evaluation",
       action="store_true",
       default=False,
+  )
+  parser.add_argument(
+      "-audio_language_code",
+      "-alc",
+      help=(
+          "BCP-47 language code for Speech Transcription"
+          " (e.g. es-ES, es-419, en-US)."
+      ),
+      default="en-US",
   )
   parser.add_argument(
       "-use_llms",
