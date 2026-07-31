@@ -108,7 +108,7 @@ Si `extract_brand_metadata` es `false`, los cuatro primeros campos se vuelven **
 | `run_long_form_abcd` | `boolean` | `true` | Evaluar las 23 features del framework ABCD para video long-form |
 | `run_shorts` | `boolean` | `true` | Evaluar las 20 features del framework para YouTube Shorts |
 | `creative_provider_type` | `string` | `"GCS"` | Fuente de los videos. Valores: `"GCS"` (Google Cloud Storage) o `"YOUTUBE"` (URLs de YouTube). Con `"YOUTUBE"` solo se puede usar LLMs (`use_annotations` se ignora) |
-| `features_to_evaluate` | `string[]` | `[]` | Lista de IDs de features específicas a evaluar. Si está vacío, se evalúan todas las features habilitadas. Ver [Catálogo de features](#catálogo-de-features) |
+| `features_to_evaluate` | `string[]` | `[]` | Lista de IDs de features. **Hoy se acepta y se guarda en la config, pero no filtra el catálogo** — se evalúan todas las features habilitadas por `run_long_form_abcd` / `run_shorts` sin importar este campo. Pendiente de decisión de producto: implementarlo o retirarlo del contrato. Ver [Catálogo de features](#catálogo-de-features) |
 | `language` | `string` | `"EN"` | Idioma del output. Valores: `"EN"` (inglés) o `"ES"` (español). Afecta los campos de texto del modelo: `rationale`, `evidence`, `strengths`, `weaknesses`. Un valor inválido retorna HTTP `422` |
 
 ---
@@ -230,7 +230,7 @@ Estos campos contienen el razonamiento del modelo en texto libre. **Pueden llega
 
 ### Ejemplo de respuesta completa
 
-Request con un video GCS, `run_long_form_abcd: true`, `run_shorts: false`, y `features_to_evaluate: ["a_dynamic_start", "b_brand_visuals"]`:
+Request con un video GCS, `run_long_form_abcd: true`, `run_shorts: false`, y `features_to_evaluate: ["a_dynamic_start", "b_brand_visuals"]` (nota: el campo se acepta pero **hoy no filtra**; con `run_long_form_abcd: true` se evalúan todas las features long-form):
 
 ```json
 {
@@ -448,7 +448,9 @@ const response = await fetch(`${SERVICE_URL}/evaluate`, {
 
 ### Evaluación de features específicas
 
-Para evaluar solo un subconjunto de features y reducir tiempo y costo:
+> **Estado actual:** el campo `features_to_evaluate` se acepta en el request y se guarda en la config, pero **aún no filtra el catálogo**. El ejemplo de abajo documenta el contrato pretendido; hasta que se implemente el filtro (o se retire el campo), el runtime evalúa todas las features habilitadas por `run_long_form_abcd` / `run_shorts`.
+
+Contrato pretendido (aún no aplicado) — evaluar solo un subconjunto de features para reducir tiempo y costo:
 
 ```js
 const response = await fetch(`${SERVICE_URL}/evaluate`, {

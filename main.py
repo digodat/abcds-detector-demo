@@ -18,7 +18,7 @@
 #
 ###########################################################################
 
-"""Module to execute the ABCD Detector Assessment"""
+"""Module to execute the feature detector assessment."""
 
 import time
 import traceback
@@ -26,7 +26,7 @@ import logging
 import models
 import utils
 from annotations_evaluation import annotations_generation
-from helpers import generic_helpers
+from helpers import pipeline_helpers
 from configuration import Configuration
 from creative_providers import creative_provider_proto
 from creative_providers import creative_provider_registry
@@ -104,7 +104,7 @@ def execute_abcd_assessment_for_videos(
           and config.creative_provider_type == models.CreativeProviderType.GCS
       ):
         _emit(config, {"type": "step", "step": "trim", "status": "running", "video_uri": video_uri})
-        generic_helpers.trim_video(config, video_uri)
+        pipeline_helpers.trim_video(config, video_uri)
         _emit(config, {"type": "step", "step": "trim", "status": "done", "video_uri": video_uri})
 
       # Execute ABCD Assessment
@@ -117,7 +117,7 @@ def execute_abcd_assessment_for_videos(
             video_evaluation_service.video_evaluation_service.evaluate_features(
                 config=config,
                 video_uri=video_uri,
-                features_category=models.VideoFeatureCategory.LONG_FORM_ABCD,
+                features_category=models.AbcdContentFormat.LONG_FORM_ABCD,
             )
         )
         _emit(config, {"type": "step", "step": "long_form_abcd", "status": "done", "video_uri": video_uri})
@@ -128,7 +128,7 @@ def execute_abcd_assessment_for_videos(
             video_evaluation_service.video_evaluation_service.evaluate_features(
                 config=config,
                 video_uri=video_uri,
-                features_category=models.VideoFeatureCategory.SHORTS,
+                features_category=models.AbcdContentFormat.SHORTS,
             )
         )
         _emit(config, {"type": "step", "step": "shorts", "status": "done", "video_uri": video_uri})
@@ -145,7 +145,7 @@ def execute_abcd_assessment_for_videos(
 
       # Print assessments for Full ABCD and Shorts and store results
       if len(long_form_abcd_evaluated_features) > 0:
-        generic_helpers.print_abcd_assessment(
+        pipeline_helpers.print_assessment(
             video_assessment.brand_name,
             video_assessment.video_uri,
             long_form_abcd_evaluated_features,
@@ -155,7 +155,7 @@ def execute_abcd_assessment_for_videos(
             "There are not Full ABCD evaluated features results to display."
         )
       if len(shorts_evaluated_features) > 0:
-        generic_helpers.print_abcd_assessment(
+        pipeline_helpers.print_assessment(
             video_assessment.brand_name,
             video_assessment.video_uri,
             shorts_evaluated_features,
@@ -167,17 +167,17 @@ def execute_abcd_assessment_for_videos(
 
       if config.bq_table_name:
         _emit(config, {"type": "step", "step": "bigquery", "status": "running", "video_uri": video_uri})
-        generic_helpers.store_in_bq(config, video_assessment)
+        pipeline_helpers.store_in_bq(config, video_assessment)
         _emit(config, {"type": "step", "step": "bigquery", "status": "done", "video_uri": video_uri})
 
       # Remove local version of video files
-      generic_helpers.remove_local_video_files(config)
+      pipeline_helpers.remove_local_video_files(config)
 
       _emit(config, {"type": "video_done", "video_uri": video_uri, "index": idx + 1, "total": len(video_uris)})
 
     except Exception as ex:
       logging.error("Error processing video %s: %s", video_uri, ex)
-      generic_helpers.remove_local_video_files(config)
+      pipeline_helpers.remove_local_video_files(config)
       assessments.append(models.VideoAssessment(
           brand_name=config.brand_name,
           video_uri=video_uri,
@@ -203,7 +203,7 @@ def main(arg_list: list[str] | None = None) -> None:
   try:
     args = utils.parse_args(arg_list)
 
-    config = utils.build_abcd_params_config(args)
+    config = utils.build_config_from_cli_args(args)
 
     if utils.invalid_brand_metadata(config):
       logging.error(

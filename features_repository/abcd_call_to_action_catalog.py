@@ -18,11 +18,31 @@
 #
 ###########################################################################
 
-"""Module to import the annotations modules to evaluate ABCD features."""
+"""ABCD catalog of common call-to-action phrases used in feature prompts."""
 
-from annotations_evaluation.features.a_dynamic_start import detect_dynamic_start
-from annotations_evaluation.features.a_quick_pacing import (
-    detect_quick_pacing,
-    detect_quick_pacing_1st_5_secs,
-)
-from annotations_evaluation.features.c_overall_pacing import detect_overall_pacing
+
+def get_call_to_action_api_list() -> list[str]:
+  """Gets a list of call to actions
+
+  Returns
+      list: call to actions
+  """
+  return [
+      "LEARN MORE",
+      "GET QUOTE",
+      "APPLY NOW",
+      "SIGN UP",
+      "CONTACT US",
+      "SUBSCRIBE",
+      "DOWNLOAD",
+      "BOOK NOW",
+      "SHOP NOW",
+      "BUY NOW",
+      "DONATE NOW",
+      "ORDER NOW",
+      "PLAY NOW",
+      "SEE MORE",
+      "START NOW",
+      "VISIT SITE",
+      "WATCH NOW",
+  ]

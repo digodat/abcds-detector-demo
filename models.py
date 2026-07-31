@@ -4,15 +4,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 
-class VideoFeatureCategory(Enum):
-  """Enum that represents video feature categories"""
+class AbcdContentFormat(Enum):
+  """Enum for ABCD content formats (long-form vs Shorts). Values are API contract."""
 
   LONG_FORM_ABCD = "LONG_FORM_ABCD"
   SHORTS = "SHORTS"
 
 
-class VideoFeatureSubCategory(Enum):
-  """Enum that represents video feature sub categories"""
+class AbcdSubCategory(Enum):
+  """Enum for ABCD pillars (A/B/C/D). Values are API contract."""
 
   ATTRACT = "ATTRACT"
   BRAND = "BRAND"
@@ -30,14 +30,6 @@ class VideoSegment(Enum):
   NONE = "NO_GROUPING"
 
 
-class EvaluationMethod(Enum):
-  """Enum that represents evaluation methods"""
-
-  LLMS_AND_ANNOTATIONS = "LLMS_AND_ANNOTATIONS"
-  LLMS = "LLMS"
-  ANNOTATIONS = "ANNOTATIONS"
-
-
 class CreativeProviderType(Enum):
   """Enum that represents evaluation methods"""
 
@@ -51,15 +43,13 @@ class VideoFeature:
 
   id: str
   name: str
-  category: VideoFeatureCategory
-  sub_category: VideoFeatureSubCategory
+  category: AbcdContentFormat
+  sub_category: AbcdSubCategory
   video_segment: VideoSegment
   evaluation_criteria: str
   prompt_template: str | None
   extra_instructions: list[str]
-  evaluation_method: EvaluationMethod
   evaluation_function: str | None
-  include_in_evaluation: bool
   group_by: str
 
 

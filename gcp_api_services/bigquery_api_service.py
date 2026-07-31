@@ -94,37 +94,6 @@ class BigQueryAPIService:
       print(f"The table {full_table_name} already exists. \n")
       return True
 
-  def get_table_by_name(self, dataset_name: str, table_name: str) -> any:
-    """Gets a table by the provided name
-    Args:
-      dataset_name: The dataset containing the table.
-      table_name: The name of the table to delete.
-    """
-    client = bigquery.Client()
-    full_table_name = self.__get_full_table_name(dataset_name, table_name)
-    try:
-      table = client.get_table(full_table_name)
-      return table
-    except cloud_exceptions.NotFound:
-      print(f"Table {full_table_name} not found!")
-      return None
-
-  def delete_table(self, dataset_name: str, table_name: str) -> None:
-    """Deletes a table with the provided name
-    Args:
-      dataset_name: the dataset containing the table
-      table_name: The name of the table to delete.
-    """
-    client = bigquery.Client()
-    full_table_name = self.__get_full_table_name(dataset_name, table_name)
-    # If the table does not exist, delete_table raises
-    # google.api_core.exceptions.NotFound unless not_found_ok is True.
-    try:
-      client.delete_table(full_table_name, not_found_ok=True)
-      print(f"Deleted table {full_table_name}")
-    except cloud_exceptions.NotFound:
-      print(f"Table {full_table_name} not found!")
-
   def load_table_from_dataframe(
       self,
       dataset_name: str,

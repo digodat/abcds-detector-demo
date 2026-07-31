@@ -18,7 +18,7 @@
 #
 ###########################################################################
 
-"""Module to evaluate features for ABCDs using custom functions"""
+"""Module to evaluate features using custom functions"""
 
 import annotations_evaluation.feature_modules as annotations_module  # Change this
 from configuration import Configuration
@@ -26,7 +26,7 @@ from models import VideoFeature, FeatureEvaluation
 
 
 class CustomDetector:
-  """Module to evaluate features for ABCDs using annotations."""
+  """Module to evaluate features using annotations."""
 
   def __init__(self):
     pass
@@ -34,9 +34,9 @@ class CustomDetector:
   def evaluate_features(
       self, config: Configuration, feature_config: VideoFeature, video_uri: str
   ) -> list[FeatureEvaluation]:
-    """Evaluates ABCD features using custom functions."""
+    """Evaluates features using custom functions."""
 
-    print("Starting ABCD evaluation using custom functions... \n")
+    print("Starting evaluation using custom functions... \n")
 
     feature_evaluations: list[FeatureEvaluation] = []
 

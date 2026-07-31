@@ -18,12 +18,9 @@
 #
 ###########################################################################
 
-"""Module to load generic helper functions"""
+"""Pipeline helper functions (video trim, scoring, BQ persistence, parallelism)."""
 
-import json
 import os
-import urllib.parse
-import urllib.request
 import datetime
 from concurrent.futures import ThreadPoolExecutor
 import logging
@@ -32,47 +29,6 @@ from gcp_api_services import bigquery_api_service
 from gcp_api_services import gcs_api_service
 from configuration import Configuration
 import models
-
-
-def get_knowledge_graph_entities(
-    config: Configuration, queries: list[str]
-) -> dict[str, dict]:
-  """Get the knowledge Graph Entities for a list of queries
-  Args:
-      config: All the parameters
-      queries: a list of entities to find in KG
-  Returns:
-      kg_entities: entities found in KG
-      Format example: entity id is the key and entity details the value
-      kg_entities = {
-          "mcy/12": {} TODO (ae) add here
-      }
-  """
-  kg_entities = {}
-  try:
-    for query in queries:
-      service_url = "https://kgsearch.googleapis.com/v1/entities:search"
-      params = {
-          "query": query,
-          "limit": 10,
-          "indent": True,
-          "key": config.knowledge_graph_api_key,
-      }
-      url = f"{service_url}?{urllib.parse.urlencode(params)}"
-      response = json.loads(urllib.request.urlopen(url).read())
-      for element in response["itemListElement"]:
-        kg_entity_name = element["result"]["name"]
-        # To only add the exact KG entity
-        if query.lower() == kg_entity_name.lower():
-          kg_entities[element["result"]["@id"][3:]] = element["result"]
-    return kg_entities
-  except Exception as ex:
-    print(
-        "\n\x1b[31mERROR: There was an error fetching the Knowledge Graph"
-        " entities. Please check that your API key is correct. ERROR:"
-        f" {ex}\x1b[0m"
-    )
-    raise
 
 
 def remove_local_video_files(config: Configuration) -> None:
@@ -127,17 +83,17 @@ def player(video_url: str):
   print(f"{video_url} \n")
 
 
-def print_abcd_assessment(
+def print_assessment(
     brand_name: str,
     video_uri: str,
     evaluated_features: list[models.FeatureEvaluation],
 ) -> None:
-  """Print ABCD Assessments"""
+  """Print feature evaluation summary."""
   bucket_name, path = video_uri.replace("gs://", "").split("/", 1)
   video_url = f"/content/{bucket_name}/{path}"
   # Play Video
   player(video_url)
-  print(f"***** ABCD Assessment for brand {brand_name} ***** \n")
+  print(f"***** Assessment for brand {brand_name} ***** \n")
   print(f"Asset name: {video_uri} \n")
   print_score_details(evaluated_features)
 
@@ -171,64 +127,10 @@ def print_score_details(
   print("\n")
 
 
-def get_call_to_action_api_list() -> list[str]:
-  """Gets a list of call to actions
-
-  Returns
-      list: call to actions
-  """
-  return [
-      "LEARN MORE",
-      "GET QUOTE",
-      "APPLY NOW",
-      "SIGN UP",
-      "CONTACT US",
-      "SUBSCRIBE",
-      "DOWNLOAD",
-      "BOOK NOW",
-      "SHOP NOW",
-      "BUY NOW",
-      "DONATE NOW",
-      "ORDER NOW",
-      "PLAY NOW",
-      "SEE MORE",
-      "START NOW",
-      "VISIT SITE",
-      "WATCH NOW",
-  ]
-
-
-def get_call_to_action_verbs_api_list() -> list[str]:
-  """Gets a list of call to action verbs
-
-  Returns
-      list: call to action verbs
-  """
-  return [
-      "LEARN",
-      "QUOTE",
-      "APPLY",
-      "SIGN UP",
-      "CONTACT",
-      "SUBSCRIBE",
-      "DOWNLOAD",
-      "BOOK",
-      "SHOP",
-      "BUY",
-      "DONATE",
-      "ORDER",
-      "PLAY",
-      "SEE",
-      "START",
-      "VISIT",
-      "WATCH",
-  ]
-
-
 def calculate_score(
     evaluated_features: list[models.FeatureEvaluation],
 ) -> float:
-  """Calculate ABCD final score"""
+  """Calculate feature evaluation final score."""
   total_features = len(evaluated_features)
   passed_features_count = 0
   for feature in evaluated_features:
@@ -391,13 +293,13 @@ def store_in_bq(
     config: Configuration,
     video_assessment: models.VideoAssessment,
 ):
-  """Store ABCD assessment results in BQ"""
+  """Store assessment results in BQ."""
 
   # Import pandas lazily to keep it out of the startup baseline.
   import pandas
 
   print(
-      f"Storing ABCD assessment for video {video_assessment.video_uri} in"
+      f"Storing assessment for video {video_assessment.video_uri} in"
       " BigQuery... \n"
   )
   bq_api_service = bigquery_api_service.BigQueryAPIService(config.project_id)
@@ -430,7 +332,7 @@ def store_in_bq(
       )
     else:
       print(
-          "Error: ABCD assessments not loaded to table"
+          "Error: assessments not loaded to table"
           f" {config.bq_dataset_name}.{config.bq_table_name} because the table"
           " could not be created. \n"
       )

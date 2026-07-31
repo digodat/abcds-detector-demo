@@ -68,10 +68,10 @@ def test_execute_returns_list_of_assessments():
   with patch(
       "main.video_evaluation_service.video_evaluation_service.evaluate_features",
       return_value=[mock_feature],
-  ), patch("main.generic_helpers.trim_video"), patch(
-      "main.generic_helpers.print_abcd_assessment"
+  ), patch("main.pipeline_helpers.trim_video"), patch(
+      "main.pipeline_helpers.print_assessment"
   ), patch(
-      "main.generic_helpers.remove_local_video_files"
+      "main.pipeline_helpers.remove_local_video_files"
   ), patch(
       "main.annotations_generation.generate_video_annotations"
   ), patch(
@@ -137,8 +137,8 @@ def test_evaluate_endpoint_calls_execute(monkeypatch):
   mock_feature = MagicMock(spec=models.VideoFeature)
   mock_feature.id = "a_dynamic_start"
   mock_feature.name = "Dynamic Start"
-  mock_feature.category = models.VideoFeatureCategory.LONG_FORM_ABCD
-  mock_feature.sub_category = models.VideoFeatureSubCategory.ATTRACT
+  mock_feature.category = models.AbcdContentFormat.LONG_FORM_ABCD
+  mock_feature.sub_category = models.AbcdSubCategory.ATTRACT
   mock_feature.video_segment = models.VideoSegment.FIRST_5_SECS_VIDEO
 
   mock_eval = models.FeatureEvaluation(
@@ -220,27 +220,27 @@ def test_language_field_rejects_invalid_value():
 
 
 def test_prompt_includes_language_instruction_en():
-  """get_abcds_prompt_config should include English instruction when language is EN."""
+  """get_features_prompt_config should include English instruction when language is EN."""
   from prompts.prompt_generator import PromptGenerator
   from configuration import Configuration
 
   config = Configuration()
   config.language = "EN"
   pg = PromptGenerator()
-  prompt_config = pg.get_abcds_prompt_config([], config)
+  prompt_config = pg.get_features_prompt_config([], config)
 
   assert "exclusively in English" in prompt_config.system_instructions
 
 
 def test_prompt_includes_language_instruction_es():
-  """get_abcds_prompt_config should include Spanish instruction when language is ES."""
+  """get_features_prompt_config should include Spanish instruction when language is ES."""
   from prompts.prompt_generator import PromptGenerator
   from configuration import Configuration
 
   config = Configuration()
   config.language = "ES"
   pg = PromptGenerator()
-  prompt_config = pg.get_abcds_prompt_config([], config)
+  prompt_config = pg.get_features_prompt_config([], config)
 
   assert "exclusivamente en español" in prompt_config.system_instructions
 
@@ -262,10 +262,10 @@ def test_per_video_error_continues_batch():
   with patch(
       "main.video_evaluation_service.video_evaluation_service.evaluate_features",
       side_effect=evaluate_side_effect,
-  ), patch("main.generic_helpers.trim_video"), patch(
-      "main.generic_helpers.print_abcd_assessment"
+  ), patch("main.pipeline_helpers.trim_video"), patch(
+      "main.pipeline_helpers.print_assessment"
   ), patch(
-      "main.generic_helpers.remove_local_video_files"
+      "main.pipeline_helpers.remove_local_video_files"
   ), patch(
       "main.annotations_generation.generate_video_annotations"
   ), patch(
@@ -291,7 +291,7 @@ def test_provider_mismatch_produces_error_assessment():
   config.set_videos(["https://www.youtube.com/watch?v=abc123"])
 
   with patch(
-      "main.generic_helpers.remove_local_video_files"
+      "main.pipeline_helpers.remove_local_video_files"
   ), patch(
       "main.creative_provider_registry.provider_factory.get_provider"
   ) as mock_provider:
@@ -314,8 +314,8 @@ def test_feature_evaluation_response_serialization():
   mock_feature = MagicMock(spec=models.VideoFeature)
   mock_feature.id = "a_dynamic_start"
   mock_feature.name = "Dynamic Start"
-  mock_feature.category = models.VideoFeatureCategory.LONG_FORM_ABCD
-  mock_feature.sub_category = models.VideoFeatureSubCategory.ATTRACT
+  mock_feature.category = models.AbcdContentFormat.LONG_FORM_ABCD
+  mock_feature.sub_category = models.AbcdSubCategory.ATTRACT
   mock_feature.video_segment = models.VideoSegment.FIRST_5_SECS_VIDEO
 
   eval_feature = models.FeatureEvaluation(

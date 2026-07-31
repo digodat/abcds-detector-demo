@@ -115,9 +115,9 @@ ABCDs Detector MVP supports a single video evaluation for the following features
   - Call To Action (Text)
   - Call To Action (Speech)
 
-For a definition for each of these signals please take a look at the [long_form_abc_features.py](https://github.com/google-marketing-solutions/abcds-detector/blob/main/features_repository/long_form_abcd_features.py) and [shorts_features.py](https://github.com/google-marketing-solutions/abcds-detector/blob/main/features_repository/shorts_features.py) files.
+For a definition for each of these signals please take a look at the [long_form_abcd_features.py](https://github.com/digodat/abcds-detector-demo/blob/main/features_repository/long_form_abcd_features.py) and [shorts_features.py](https://github.com/digodat/abcds-detector-demo/blob/main/features_repository/shorts_features.py) files.
 
-The final result of the assessment (Excellent, Might Improve or Needs Review) is defined in the [generics_helpers.py](https://github.com/google-marketing-solutions/abcds-detector/blob/main/helpers/generic_helpers.py?plain=1#L186) and can be customized based on preferences.
+The final result of the assessment (Excellent, Might Improve or Needs Review) is defined in the [pipeline_helpers.py](https://github.com/digodat/abcds-detector-demo/blob/main/helpers/pipeline_helpers.py?plain=1#L101) and can be customized based on preferences.
 
 ### Google Cloud Cost breakdown
 
@@ -208,7 +208,7 @@ Content-Type: application/json
 | `use_annotations` | `boolean` | `false` | Enable Video Intelligence API annotations |
 | `run_long_form_abcd` | `boolean` | `true` | Evaluate ABCDs long-form features |
 | `run_shorts` | `boolean` | `true` | Evaluate YouTube Shorts features |
-| `features_to_evaluate` | `string[]` | `[]` | Feature IDs to run (empty = all features) |
+| `features_to_evaluate` | `string[]` | `[]` | Accepted and stored, but **not applied today** — the catalog is not filtered by these IDs. Empty or populated, all enabled features still run. Product decision pending: implement filtering or remove from the public contract. |
 | `creative_provider_type` | `string` | `"GCS"` | `"GCS"` or `"YOUTUBE"` |
 | `language` | `string` | `"EN"` | Output language for LLM text fields: `"EN"` or `"ES"` |
 | `audio_language_code` | `string` | `"en-US"` | BCP-47 language code for Speech Transcription in Video Intelligence annotations (e.g. `"es-ES"`, `"es-419"`, `"en-US"`). Independent from `language`, which only controls the LLM output text language. Only relevant when `use_annotations=true`. |

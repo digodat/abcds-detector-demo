@@ -20,7 +20,7 @@
 
 """Module to test ABCD parameters"""
 
-from utils import build_abcd_params_config
+from utils import build_config_from_cli_args
 from dataclasses import dataclass
 
 
@@ -106,7 +106,7 @@ def test_not_empty_abcd_params():
       top_p=0.1,
   )
 
-  config = build_abcd_params_config(args)
+  config = build_config_from_cli_args(args)
 
   assert config.project_id is not None
   assert config.project_zone is not None
@@ -118,7 +118,6 @@ def test_not_empty_abcd_params():
   assert config.use_annotations is not None
   assert config.use_llms is not None
   assert config.verbose is not None
-  assert config.annotation_path is not None
   assert config.audio_language_code == "en-US"
 
   # set videos

@@ -18,9 +18,11 @@
 #
 ###########################################################################
 
-"""Module to define the prompts that will contain the ABCD features."""
+"""Module to define the prompts that will contain the evaluation features."""
 
-from helpers.generic_helpers import get_call_to_action_api_list
+from features_repository.abcd_call_to_action_catalog import (
+    get_call_to_action_api_list,
+)
 from configuration import Configuration
 from models import VideoFeature, PromptConfig
 
@@ -32,15 +34,15 @@ _LANGUAGE_INSTRUCTIONS = {
 
 
 class PromptGenerator:
-  """Class to generate the prompts that will contain the ABCD features."""
+  """Class to generate the prompts that will contain the evaluation features."""
 
   def __init__(self):
     pass
 
-  def get_abcds_prompt_config(
+  def get_features_prompt_config(
       self, features: list[VideoFeature], config: Configuration
   ) -> PromptConfig:
-    """Gets the prompt with required ABCD features
+    """Gets the prompt with required features
     for full videos and first 5 secs videos
     Returns:
         prompt: string prompt template

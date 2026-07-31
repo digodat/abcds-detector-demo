@@ -38,13 +38,13 @@ class LLMDetector:
       config: Configuration,
       evaluation_details: dict,
   ):
-    """Evaluates ABCD features using LLMs."""
+    """Evaluates features using LLMs."""
     print(
         "Starting LLM evaluation for features grouped by"
         f" {evaluation_details.get('category')} and"
         f" {evaluation_details.get('group_by')}... \n"
     )
-    prompt_config = prompt_generator.get_abcds_prompt_config(
+    prompt_config = prompt_generator.get_features_prompt_config(
         evaluation_details.get("feature_configs"),
         config,
     )
@@ -68,7 +68,7 @@ class LLMDetector:
     if config.verbose:
       if len(evaluated_features) == 0:
         print(
-            "WARNING: ABCD Detector was not able to process features for video"
+            "WARNING: Detector was not able to process features for video"
             f" {evaluation_details.get('video_uri')}... Please review. \n"
         )
 
