@@ -24,7 +24,6 @@
 from models import (
     VideoFeature,
     VideoSegment,
-    EvaluationMethod,
     VideoFeatureCategory,
     VideoFeatureSubCategory,
 )
@@ -114,9 +113,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
                 - **Calculation:** Ensure the density_score is a precise float based on the temporal_segments sum.
             """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -185,9 +182,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             4. Determine if the "Hook" (0:00-0:02) contains speech, as this is a high-retention signal.
         """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -259,9 +254,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
                 4. Check the "Hook" (0:00-0:02); direct address at the start is a major retention driver.
             """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -332,9 +325,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
         5. Verify if text is in the "Mobile Safe Zone" (central area, not blocked by platform UI).
     """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -400,9 +391,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             - If the product fills >60%, it exceeds this feature and belongs in the 'Extreme' category.
         """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -469,9 +458,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             - Focus on detail: ECU shots are intended to show the "hero" aspects of the product.
         """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -556,9 +543,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             - LOW (<50): Product is just sitting there, or being held like a trophy for the camera.
             """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -599,9 +584,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             }}
             """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -642,9 +625,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
         }}
     """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -709,9 +690,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
                 }}
             }}""",
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -781,9 +760,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
         4. Note the placement: A CTA at the very end is standard; a CTA in the first 5 seconds is a "Fast-Action" strategy.
     """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -847,9 +824,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
                 }}
             }}""",
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -920,9 +895,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
         4. Lower the **Authenticity Rating** if the video uses professional motion graphics or studio-exclusive color palettes.
     """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -990,9 +963,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             - **Intent:** Distinguish between intentional Lo-Fi style and poor production quality.
         """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -1060,9 +1031,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             - **Relevance:** Higher impact if the emoji matches the spoken word or emotional tone.
         """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -1123,9 +1092,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
                 }}
             }}""",
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -1186,9 +1153,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
                 }}
             }}""",
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -1228,9 +1193,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             }}
         """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -1291,9 +1254,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
                 }}
             }}""",
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -1332,9 +1293,7 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
             }}
         """,
           extra_instructions=[],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
   ]

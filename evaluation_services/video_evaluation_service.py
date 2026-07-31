@@ -47,12 +47,6 @@ class VideoEvaluationService:
     for group_key in feature_groups:
       feature_configs: list[models.VideoFeature] = feature_groups.get(group_key)
 
-      # Use LLM evaluation method only
-      if config.use_llms and not config.use_annotations:
-        feature_configs_handler.features_configs_handler.change_evaluation_method_to_llms_only(
-            feature_configs
-        )
-
       # Process the features that are not grouped individually
       # meaning, each will be a separate request to the LLM
       if (

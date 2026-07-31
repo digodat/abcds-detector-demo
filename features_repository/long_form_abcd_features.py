@@ -24,7 +24,6 @@ from models import (
     VideoFeature,
     VideoFeatureCategory,
     VideoSegment,
-    EvaluationMethod,
     VideoFeatureSubCategory,
 )
 
@@ -62,9 +61,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " changes in less than 3 seconds."
               ),
           ],
-          evaluation_method=EvaluationMethod.ANNOTATIONS,
           evaluation_function="detect_dynamic_start",
-          include_in_evaluation=True,
           group_by=VideoSegment.NONE,
       ),
       VideoFeature(
@@ -100,9 +97,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " is less than 5."
               ),
           ],
-          evaluation_method=EvaluationMethod.ANNOTATIONS,
           evaluation_function="detect_quick_pacing",
-          include_in_evaluation=True,
           group_by=VideoSegment.NONE,
       ),
       VideoFeature(
@@ -135,9 +130,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
               ),
               "Return False if the number of shots identified is less than 5.",
           ],
-          evaluation_method=EvaluationMethod.ANNOTATIONS,
           evaluation_function="detect_quick_pacing_1st_5_secs",
-          include_in_evaluation=True,
           group_by=VideoSegment.NONE,
       ),
       VideoFeature(
@@ -163,9 +156,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " as the list of supers."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -191,9 +182,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
               """Provide the exact timestamp where supers are found and the timestamp when
                 the speech matches the supers or is contextually supportive of the overlaid text shown on the video.""",
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -215,9 +204,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " heard in the speech of the video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -243,9 +230,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " in the speech of the video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FIRST_5_SECS_VIDEO,
       ),
       VideoFeature(
@@ -271,9 +256,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " brand logo {brand_name} is found."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -299,9 +282,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " brand logo {brand_name} is found."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FIRST_5_SECS_VIDEO,
       ),
       VideoFeature(
@@ -331,9 +312,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " consider visual elements."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -363,9 +342,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " consider visual elements."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FIRST_5_SECS_VIDEO,
       ),
       VideoFeature(
@@ -387,9 +364,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
               """Provide the exact timestamp when the products {branded_products} or product categories:
                 {branded_products_categories} are found  in any text or overlay in the video.""",
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -414,9 +389,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " overlay in the video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FIRST_5_SECS_VIDEO,
       ),
       VideoFeature(
@@ -442,9 +415,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " categories are visually present in the video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -470,9 +441,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " categories are visually present in the video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FIRST_5_SECS_VIDEO,
       ),
       VideoFeature(
@@ -498,9 +467,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " seconds per shot/frame."
               ),
           ],
-          evaluation_method=EvaluationMethod.ANNOTATIONS,
           evaluation_function="detect_overall_pacing",
-          include_in_evaluation=True,
           group_by=VideoSegment.NONE,
       ),
       VideoFeature(
@@ -527,9 +494,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -556,9 +521,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FIRST_5_SECS_VIDEO,
       ),
       VideoFeature(
@@ -582,9 +545,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
               ),
               "Provide the exact timestamp when the human face is present.",
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FIRST_5_SECS_VIDEO,
       ),
       VideoFeature(
@@ -610,9 +571,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " human face."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -631,9 +590,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
               "Consider the following criteria for your answer: {criteria}",
               "Only strictly use the speech of the video to answer.",
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FIRST_5_SECS_VIDEO,
       ),
       VideoFeature(
@@ -656,9 +613,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " heard or mentioned in the speech of the video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
       VideoFeature(
@@ -685,9 +640,7 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
                   " detected in any text overlay in the video."
               ),
           ],
-          evaluation_method=EvaluationMethod.LLMS,
           evaluation_function="",
-          include_in_evaluation=True,
           group_by=VideoSegment.FULL_VIDEO,
       ),
   ]

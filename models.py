@@ -30,14 +30,6 @@ class VideoSegment(Enum):
   NONE = "NO_GROUPING"
 
 
-class EvaluationMethod(Enum):
-  """Enum that represents evaluation methods"""
-
-  LLMS_AND_ANNOTATIONS = "LLMS_AND_ANNOTATIONS"
-  LLMS = "LLMS"
-  ANNOTATIONS = "ANNOTATIONS"
-
-
 class CreativeProviderType(Enum):
   """Enum that represents evaluation methods"""
 
@@ -57,9 +49,7 @@ class VideoFeature:
   evaluation_criteria: str
   prompt_template: str | None
   extra_instructions: list[str]
-  evaluation_method: EvaluationMethod
   evaluation_function: str | None
-  include_in_evaluation: bool
   group_by: str
 
 

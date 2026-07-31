@@ -20,10 +20,7 @@
 
 """Module to load generic helper functions"""
 
-import json
 import os
-import urllib.parse
-import urllib.request
 import datetime
 from concurrent.futures import ThreadPoolExecutor
 import logging
@@ -32,47 +29,6 @@ from gcp_api_services import bigquery_api_service
 from gcp_api_services import gcs_api_service
 from configuration import Configuration
 import models
-
-
-def get_knowledge_graph_entities(
-    config: Configuration, queries: list[str]
-) -> dict[str, dict]:
-  """Get the knowledge Graph Entities for a list of queries
-  Args:
-      config: All the parameters
-      queries: a list of entities to find in KG
-  Returns:
-      kg_entities: entities found in KG
-      Format example: entity id is the key and entity details the value
-      kg_entities = {
-          "mcy/12": {} TODO (ae) add here
-      }
-  """
-  kg_entities = {}
-  try:
-    for query in queries:
-      service_url = "https://kgsearch.googleapis.com/v1/entities:search"
-      params = {
-          "query": query,
-          "limit": 10,
-          "indent": True,
-          "key": config.knowledge_graph_api_key,
-      }
-      url = f"{service_url}?{urllib.parse.urlencode(params)}"
-      response = json.loads(urllib.request.urlopen(url).read())
-      for element in response["itemListElement"]:
-        kg_entity_name = element["result"]["name"]
-        # To only add the exact KG entity
-        if query.lower() == kg_entity_name.lower():
-          kg_entities[element["result"]["@id"][3:]] = element["result"]
-    return kg_entities
-  except Exception as ex:
-    print(
-        "\n\x1b[31mERROR: There was an error fetching the Knowledge Graph"
-        " entities. Please check that your API key is correct. ERROR:"
-        f" {ex}\x1b[0m"
-    )
-    raise
 
 
 def remove_local_video_files(config: Configuration) -> None:
@@ -195,33 +151,6 @@ def get_call_to_action_api_list() -> list[str]:
       "START NOW",
       "VISIT SITE",
       "WATCH NOW",
-  ]
-
-
-def get_call_to_action_verbs_api_list() -> list[str]:
-  """Gets a list of call to action verbs
-
-  Returns
-      list: call to action verbs
-  """
-  return [
-      "LEARN",
-      "QUOTE",
-      "APPLY",
-      "SIGN UP",
-      "CONTACT",
-      "SUBSCRIBE",
-      "DOWNLOAD",
-      "BOOK",
-      "SHOP",
-      "BUY",
-      "DONATE",
-      "ORDER",
-      "PLAY",
-      "SEE",
-      "START",
-      "VISIT",
-      "WATCH",
   ]
 
 

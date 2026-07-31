@@ -4,8 +4,11 @@ Backend FastAPI de ABCDs Detector. Corre en Cloud Run y expone la evaluación AB
 creatividades en video.
 
 > Este archivo y `CLAUDE.md` son locales de este fork (`digodat/abcds-detector-demo`). No
-> existen en el upstream `google-marketing-solutions/abcds-detector`: al mergear upstream,
-> conservarlos.
+> existen en el upstream `google-marketing-solutions/abcds-detector`.
+>
+> **Upstream:** se dejó de seguir el upstream de forma consciente. No asumir merges
+> periódicos desde `google-marketing-solutions/abcds-detector`; este repo evoluciona por su
+> cuenta. Si en el futuro se retoma, tratarlo como un port puntual, no como sync rutinario.
 
 ## Arquitectura: este repo es la mitad de un sistema de dos repos
 

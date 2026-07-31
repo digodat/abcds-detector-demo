@@ -29,7 +29,6 @@ from features_repository.long_form_abcd_features import (
     get_long_form_abcd_feature_configs,
 )
 from features_repository.shorts_features import get_shorts_feature_configs
-import models
 
 
 class FeaturesConfigsHandler:
@@ -53,11 +52,6 @@ class FeaturesConfigsHandler:
       return long_form_abcd_features
     else:
       logging.log("Category %s not supported. Please check", category)
-
-  def change_evaluation_method_to_llms_only(self, features: list[VideoFeature]):
-    """Change features evaluation method to use LLMs"""
-    for feature in features:
-      feature.evaluation_method = models.EvaluationMethod.LLMS
 
   def get_features_by_category_by_group_config(
       self, category: VideoFeatureCategory

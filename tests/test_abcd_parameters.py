@@ -118,7 +118,6 @@ def test_not_empty_abcd_params():
   assert config.use_annotations is not None
   assert config.use_llms is not None
   assert config.verbose is not None
-  assert config.annotation_path is not None
   assert config.audio_language_code == "en-US"
 
   # set videos
