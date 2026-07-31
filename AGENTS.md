@@ -9,6 +9,8 @@ creatividades en video.
 > **Upstream:** se dejó de seguir el upstream de forma consciente. No asumir merges
 > periódicos desde `google-marketing-solutions/abcds-detector`; este repo evoluciona por su
 > cuenta. Si en el futuro se retoma, tratarlo como un port puntual, no como sync rutinario.
+> **NUNCA abrir PRs contra el upstream de Google** — solo contra
+> `digodat/abcds-detector-demo` (detalle en `CLAUDE.md`).
 
 ## Arquitectura: este repo es la mitad de un sistema de dos repos
 
