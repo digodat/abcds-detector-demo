@@ -76,6 +76,7 @@ class VideoAssessment:
   shorts_evaluated_features: list[FeatureEvaluation]
   config: any  # TODO (ae) change this later
   error: str | None = None
+  framework_id: str = "abcd"
 
 
 @dataclass

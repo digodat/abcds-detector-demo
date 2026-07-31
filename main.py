@@ -139,6 +139,7 @@ def execute_abcd_assessment_for_videos(
           long_form_abcd_evaluated_features=long_form_abcd_evaluated_features,
           shorts_evaluated_features=shorts_evaluated_features,
           config=config,
+          framework_id=config.framework_id,
       )
 
       assessments.append(video_assessment)
@@ -185,6 +186,7 @@ def execute_abcd_assessment_for_videos(
           shorts_evaluated_features=[],
           config=config,
           error=str(ex),
+          framework_id=config.framework_id,
       ))
       _emit(config, {"type": "video_error", "video_uri": video_uri, "index": idx + 1, "total": len(video_uris), "detail": str(ex)})
 

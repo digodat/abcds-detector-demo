@@ -35,6 +35,18 @@ def _setup_config(
     kg_api_key: str,
 ) -> None:
   """Populate config from the request. Raises HTTPException on invalid input."""
+  from frameworks import framework_registry
+
+  resolved_framework_id = request.framework_id or "abcd"
+  if resolved_framework_id not in framework_registry.framework_factory_instance.list_framework_ids():
+    raise HTTPException(
+        status_code=400,
+        detail=(
+            f"Unknown framework_id '{resolved_framework_id}'. Known frameworks: "
+            f"{framework_registry.framework_factory_instance.list_framework_ids()}"
+        ),
+    )
+
   config.set_parameters(
       project_id=project_id,
       project_zone=request.project_zone,
@@ -53,6 +65,7 @@ def _setup_config(
       verbose=False,
       language=request.language,
       audio_language_code=request.audio_language_code,
+      framework_id=resolved_framework_id,
   )
   config.set_videos(request.video_uris)
   config.set_brand_details(

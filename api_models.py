@@ -36,6 +36,10 @@ class EvaluateRequest(BaseModel):
   use_llms: Optional[bool] = True
   run_long_form_abcd: Optional[bool] = True
   run_shorts: Optional[bool] = True
+  # Which evaluation framework to run. None/omitted means "abcd" (the default and,
+  # for now, only registered framework). Must be validated against the framework
+  # registry — never silently coerced to a value the caller didn't ask for.
+  framework_id: Optional[str] = None
   creative_provider_type: Optional[str] = "GCS"
   features_to_evaluate: Optional[list[str]] = []
 
@@ -112,6 +116,7 @@ class VideoAssessmentResponse(BaseModel):
   video_uri: str
   long_form_abcd: list[FeatureEvaluationResponse]
   shorts: list[FeatureEvaluationResponse]
+  framework_id: str
   error: Optional[str] = None
 
   @classmethod
@@ -130,6 +135,7 @@ class VideoAssessmentResponse(BaseModel):
             FeatureEvaluationResponse.from_feature_evaluation(f)
             for f in assessment.shorts_evaluated_features
         ],
+        framework_id=assessment.framework_id,
         error=assessment.error,
     )
 

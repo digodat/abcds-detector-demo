@@ -4,7 +4,7 @@ import logging
 import functools
 import models
 import configuration
-from features_repository import feature_configs_handler
+from frameworks import framework_registry
 from llms_evaluation import llms_detector
 from custom_evaluation import custom_detector
 from helpers import pipeline_helpers
@@ -37,9 +37,13 @@ class VideoEvaluationService:
       )
       config.branded_call_to_actions = metadata.get("branded_call_to_actions")
 
+    framework = framework_registry.framework_factory_instance.get_framework(
+        config.framework_id
+    )
+
     feature_evaluations: list[models.FeatureEvaluation] = []
     tasks = []
-    feature_groups = feature_configs_handler.features_configs_handler.get_features_by_category_by_group_config(
+    feature_groups = framework.get_features_by_category_by_group_config(
         features_category
     )
     uri = video_uri  # use full video uri by default
@@ -126,7 +130,7 @@ class VideoEvaluationService:
     for evals in llm_evals:
       for evaluated_feature in evals:
         feature: models.VideoFeature = (
-            feature_configs_handler.features_configs_handler.get_feature_by_id(
+            framework.get_feature_by_id(
                 evaluated_feature.get("id")
             )
         )

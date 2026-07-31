@@ -105,6 +105,45 @@ def test_evaluate_request_defaults():
   assert req.extract_brand_metadata is True
   assert req.creative_provider_type == "GCS"
   assert req.audio_language_code == "en-US"
+  assert req.framework_id is None
+
+
+def test_setup_config_defaults_framework_id_to_abcd():
+  """_setup_config should resolve omitted framework_id to abcd."""
+  from configuration import Configuration
+  from api_models import EvaluateRequest
+  from server import _setup_config
+
+  config = Configuration()
+  request = EvaluateRequest(
+      video_uris=["gs://bucket/video.mp4"],
+      bucket_name="my-bucket",
+  )
+  _setup_config(config, request, "my-project", "")
+
+  assert config.framework_id == "abcd"
+  config.cleanup()
+
+
+def test_setup_config_rejects_unknown_framework_id():
+  """_setup_config should raise HTTPException 400 for unknown framework_id."""
+  from fastapi import HTTPException
+  from configuration import Configuration
+  from api_models import EvaluateRequest
+  from server import _setup_config
+
+  config = Configuration()
+  request = EvaluateRequest(
+      video_uris=["gs://bucket/video.mp4"],
+      bucket_name="my-bucket",
+      framework_id="no-existe",
+  )
+  with pytest.raises(HTTPException) as exc_info:
+    _setup_config(config, request, "my-project", "")
+
+  assert exc_info.value.status_code == 400
+  assert "no-existe" in exc_info.value.detail
+  config.cleanup()
 
 
 def test_evaluate_request_requires_video_uris():
@@ -179,6 +218,7 @@ def test_evaluate_endpoint_calls_execute(monkeypatch):
   assert data["status"] == "success"
   assert len(data["assessments"]) == 1
   assert data["assessments"][0]["brand_name"] == "TestBrand"
+  assert data["assessments"][0]["framework_id"] == "abcd"
   assert data["assessments"][0]["long_form_abcd"][0]["feature_id"] == "a_dynamic_start"
   assert data["assessments"][0]["long_form_abcd"][0]["detected"] is True
 
