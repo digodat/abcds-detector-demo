@@ -51,6 +51,7 @@ class Configuration:
     self.use_llms = True
     self.run_long_form_abcd: bool = True
     self.run_shorts: bool = True
+    self.framework_id: str = "abcd"
     self.features_to_evaluate: list[str] = []  # list of feature ids to run
     self.creative_provider_type = CreativeProviderType.GCS  # GCS by default
 
@@ -110,6 +111,7 @@ class Configuration:
       verbose: bool,
       language: str = "EN",
       audio_language_code: str = "en-US",
+      framework_id: str = "abcd",
   ) -> None:
     """Set the required parameters for ABCD to run.
 
@@ -142,6 +144,7 @@ class Configuration:
     self.use_llms = use_llms
     self.run_long_form_abcd = run_long_form_abcd
     self.run_shorts = run_shorts
+    self.framework_id = framework_id
     self.verbose = verbose
     self.features_to_evaluate = features_to_evaluate
 
