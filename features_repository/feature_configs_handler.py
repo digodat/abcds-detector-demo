@@ -23,7 +23,7 @@
 import logging
 from models import (
     VideoFeature,
-    VideoFeatureCategory,
+    AbcdContentFormat,
 )
 from features_repository.long_form_abcd_features import (
     get_long_form_abcd_feature_configs,
@@ -35,18 +35,18 @@ class FeaturesConfigsHandler:
   """Service that handles video evaluations using AI (LLMs + Annotations)"""
 
   def get_feature_configs_by_category(
-      self, category: VideoFeatureCategory
+      self, category: AbcdContentFormat
   ) -> list[VideoFeature]:
     """Gets all the supported features by category
     Full ABCD, Shorts.
     Returns:
     feature_configs: list of feature configurations
     """
-    if category.value == VideoFeatureCategory.SHORTS.value:
+    if category.value == AbcdContentFormat.SHORTS.value:
       shorts_features = get_shorts_feature_configs()
 
       return shorts_features
-    elif category.value == VideoFeatureCategory.LONG_FORM_ABCD.value:
+    elif category.value == AbcdContentFormat.LONG_FORM_ABCD.value:
       long_form_abcd_features = get_long_form_abcd_feature_configs()
 
       return long_form_abcd_features
@@ -54,7 +54,7 @@ class FeaturesConfigsHandler:
       logging.log("Category %s not supported. Please check", category)
 
   def get_features_by_category_by_group_config(
-      self, category: VideoFeatureCategory
+      self, category: AbcdContentFormat
   ) -> list[VideoFeature]:
     """Groups features by video_segment in feature_configs"""
     feature_configs = self.get_feature_configs_by_category(category)
@@ -70,11 +70,11 @@ class FeaturesConfigsHandler:
     feature_configs = []
     feature_configs.extend(
         self.get_feature_configs_by_category(
-            VideoFeatureCategory.LONG_FORM_ABCD
+            AbcdContentFormat.LONG_FORM_ABCD
         )
     )
     feature_configs.extend(
-        self.get_feature_configs_by_category(VideoFeatureCategory.SHORTS)
+        self.get_feature_configs_by_category(AbcdContentFormat.SHORTS)
     )
 
     return feature_configs

@@ -24,8 +24,8 @@
 from models import (
     VideoFeature,
     VideoSegment,
-    VideoFeatureCategory,
-    VideoFeatureSubCategory,
+    AbcdContentFormat,
+    AbcdSubCategory,
 )
 
 
@@ -45,8 +45,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="tight_framing_index",
           name="Tight Framing & Visual Dominance",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 Quantifies the spatial dominance of the primary subject.
@@ -119,8 +119,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_human_voice",
           name="Human Voice Presence",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Quantifies the presence, duration, and quality of human speech. 
@@ -188,8 +188,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_direct_to_camera",
           name="Direct to Camera",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 Quantifies the duration and intensity of direct eye contact between the 
@@ -260,8 +260,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_has_supers",
           name="Supers & Text-Audio Synchronicity",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
         Quantifies the presence, accuracy, and synchronization of text overlays (supers) 
@@ -331,8 +331,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_product_closeup",
           name="Product Close-Up",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Quantifies segments where the product occupies at least 30% of the frame. 
@@ -397,8 +397,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_product_extreme_closeup",
           name="Product Extreme Close-Up",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Quantifies segments where the product is the dominant visual element, 
@@ -464,8 +464,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_product_context_index",
           name="Product Context & Usage Quality",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Evaluates the 'Show, Don't Tell' quality. Quantifies physical 
@@ -549,8 +549,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_casual_language",
           name="Casual Language",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Quantifies the informality of the script. Measures the use of everyday language, 
@@ -590,8 +590,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_humor_index",
           name="Humor & Comedic Timing",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
         Detects and quantifies attempts at humor, including wit, physical comedy, 
@@ -631,8 +631,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="character_driven",
           name="Character-Driven",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Video features a relatable character whose journey or transformation resonates with audience.
@@ -696,8 +696,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_audio_cta",
           name="Call to Action (Audio)",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.DIRECT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.DIRECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
         Detects and quantifies spoken instructions that direct the viewer to take 
@@ -766,8 +766,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="special_offer_speech",
           name="Special Offer (Speech)",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.DIRECT,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.DIRECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Audio/voiceover explicitly announces special offer, discount, or deal.
@@ -830,8 +830,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_production_style_index",
           name="Production Style",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.NONE,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.NONE,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
         Quantifies the visual 'Lo-Fi' vs. 'Hi-Fi' characteristics of the video. 
@@ -901,8 +901,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_sfv_adaptation_high",
           name="Short Form Video Adaptation",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.NONE,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.NONE,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Quantifies the 'Native Emulation' of the production. Measures how effectively 
@@ -969,8 +969,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_emoji_usage",
           name="Emoji Usage",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.NONE,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.NONE,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Detects intentional creative emoji use: 1. Standard characters in text, 
@@ -1037,8 +1037,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_personal_character_talk",
           name="Direct to Camera Character Talk",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.NONE,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.NONE,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Evaluates the intimacy and continuity of direct lens address. 
@@ -1098,8 +1098,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_native_brand_context",
           name="Brand Secondary Element",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.NONE,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.NONE,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Evaluates if the brand is positioned as a secondary, natural element. 
@@ -1159,8 +1159,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_personal_character_type",
           name="Everyday Persona Validation",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.NONE,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.NONE,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Determines if the video is led by a relatable 'everyday person' or creator. 
@@ -1199,8 +1199,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_product_context",
           name="Secondary Product Context",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.NONE,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.NONE,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
             Evaluates if the product is positioned as a secondary element rather than the main focus of the ad, 
@@ -1260,8 +1260,8 @@ def get_shorts_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="shorts_video_format",
           name="Vertical Format Designed For Mobile",
-          category=VideoFeatureCategory.SHORTS,
-          sub_category=VideoFeatureSubCategory.NONE,
+          category=AbcdContentFormat.SHORTS,
+          sub_category=AbcdSubCategory.NONE,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria=(
               "Verifies 9:16 portrait ratio and detects"

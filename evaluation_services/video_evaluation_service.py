@@ -7,7 +7,7 @@ import configuration
 from features_repository import feature_configs_handler
 from llms_evaluation import llms_detector
 from custom_evaluation import custom_detector
-from helpers import generic_helpers
+from helpers import pipeline_helpers
 from gcp_api_services import gcs_api_service
 
 
@@ -21,9 +21,9 @@ class VideoEvaluationService:
       self,
       config: configuration.Configuration,
       video_uri: str,
-      features_category: models.VideoFeatureCategory,
+      features_category: models.AbcdContentFormat,
   ):
-    """Run ABCD evaluation on videos for Full ABCD features or Shorts"""
+    """Run feature evaluation on videos for long-form or Shorts."""
 
     if config.extract_brand_metadata:
       metadata = llms_detector.llms_detector.get_video_metadata(
@@ -118,9 +118,9 @@ class VideoEvaluationService:
         # Add task to be process
         tasks.append(func)
 
-    logging.info("Starting ABCD evaluation for features... \n")
+    logging.info("Starting evaluation for features... \n")
 
-    llm_evals = generic_helpers.execute_tasks_in_parallel(tasks)
+    llm_evals = pipeline_helpers.execute_tasks_in_parallel(tasks)
 
     # Process LLM results and create feature objs in the required format
     for evals in llm_evals:
@@ -150,7 +150,7 @@ class VideoEvaluationService:
           )
 
     # Sort features by category and id for presentation
-    if features_category == models.VideoFeatureCategory.LONG_FORM_ABCD:
+    if features_category == models.AbcdContentFormat.LONG_FORM_ABCD:
       feature_evaluations = sorted(
           feature_evaluations,
           key=lambda feature_eval: (

@@ -25,13 +25,13 @@ import textwrap
 from configuration import Configuration
 
 
-def build_abcd_params_config(args: any) -> Configuration:
-  """Builds ABCD configuration with all the required parameters.
+def build_config_from_cli_args(args: any) -> Configuration:
+  """Builds configuration with all the required parameters from CLI args.
 
   Args:
       args: The parser arguments.
   Returns:
-      config: The parameter configuration for ABCD.
+      config: The parameter configuration.
 
   """
   config = Configuration()

@@ -22,9 +22,9 @@
 
 from models import (
     VideoFeature,
-    VideoFeatureCategory,
+    AbcdContentFormat,
     VideoSegment,
-    VideoFeatureSubCategory,
+    AbcdSubCategory,
 )
 
 
@@ -37,8 +37,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="a_dynamic_start",
           name="Dynamic Start",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,  # Use full video for annotations
           evaluation_criteria="""
                 The first shot in the video changes in less than 3 seconds.
@@ -67,8 +67,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="a_quick_pacing",
           name="Quick Pacing",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,  # Use full video for annotations
           evaluation_criteria="""
                 Within ANY 5 consecutive seconds there are 5 or more shots in the video. These include hard cuts, soft
@@ -103,8 +103,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="a_quick_pacing_1st_5_secs",
           name="Quick Pacing (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,  # Use full video for annotations
           evaluation_criteria="""
                 There are at least 5 shot changes or visual cuts detected in the first 5 seconds of the video. These include hard cuts,
@@ -136,8 +136,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="a_supers",
           name="Supers",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 Any supers (text overlays) have been incorporated at any time in the video.
@@ -162,8 +162,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="a_supers_with_audio",
           name="Supers with Audio",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.ATTRACT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.ATTRACT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 The speech heard in the audio of the video matches OR is contextually supportive of the overlaid
@@ -188,8 +188,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_brand_mention_speech",
           name="Brand Mention (Speech)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 The brand name is heard in the audio or speech at any time in the video.
@@ -210,8 +210,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_brand_mention_speech_1st_5_secs",
           name="Brand Mention (Speech) (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FIRST_5_SECS_VIDEO,
           evaluation_criteria="""
                 The brand name is heard in the audio or speech in the first 5 seconds of the video.
@@ -236,8 +236,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_brand_visuals",
           name="Brand Visuals",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 Branding, defined as the brand name or brand logo are shown in-situation or overlaid at any time in the video.
@@ -262,8 +262,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_brand_visuals_1st_5_secs",
           name="Brand Visuals (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FIRST_5_SECS_VIDEO,
           evaluation_criteria="""
                 Branding, defined as the brand name or brand logo are shown in-situation or overlaid in the first 5 seconds of the video.
@@ -288,8 +288,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_product_mention_speech",
           name="Product Mention (Speech)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 The branded product names or generic product categories are heard or mentioned in the audio or speech
@@ -318,8 +318,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_product_mention_speech_1st_5_secs",
           name="Product Mention (Speech) (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FIRST_5_SECS_VIDEO,
           evaluation_criteria="""
                 The branded product names or generic product categories are heard or mentioned in the audio or speech
@@ -348,8 +348,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_product_mention_text",
           name="Product Mention (Text)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 The branded product names or generic product categories are present in any text or overlay at any
@@ -370,8 +370,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_product_mention_text_1st_5_secs",
           name="Product Mention (Text) (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FIRST_5_SECS_VIDEO,
           evaluation_criteria="""
                 The branded product names or generic product categories are present in any text or overlay in the first 5 seconds of the video.
@@ -395,8 +395,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_product_visuals",
           name="Product Visuals",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 A product or branded packaging is visually present at any time in the video. Where the product is a service a relevant
@@ -421,8 +421,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="b_product_visuals_1st_5_secs",
           name="Product Visuals (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.BRAND,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.BRAND,
           video_segment=VideoSegment.FIRST_5_SECS_VIDEO,
           evaluation_criteria="""
                 A product or branded packaging is visually present in the first 5 seconds of the video. Where the product is a service,
@@ -447,8 +447,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="c_overall_pacing",
           name="Overall Pacing",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FULL_VIDEO,  # Use full video for annotations
           evaluation_criteria="""
                 The pace of the video is less than 2 seconds per shot/frame.
@@ -473,8 +473,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="c_presence_of_people",
           name="Presence of People",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 People are shown in any capacity at any time in the video. Any human body parts are acceptable to pass
@@ -500,8 +500,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="c_presence_of_people_1st_5_secs",
           name="Presence of People (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FIRST_5_SECS_VIDEO,
           evaluation_criteria="""
                 People are shown in any capacity in the first 5 seconds of the video. Any human body parts are acceptable to pass this guideline.
@@ -527,8 +527,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="c_visible_face",
           name="Visible Face (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FIRST_5_SECS_VIDEO,
           evaluation_criteria="""
                 At least one human face is present in the first 5 seconds of the video. Alternate representations of people such as
@@ -551,8 +551,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="c_visible_face_close_up",
           name="Visible Face (Close Up)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.CONNECT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.CONNECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 There is a close up of a human face at any time in the video.
@@ -577,8 +577,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="d_audio_speech_early_1st_5_secs",
           name="Audio Early (First 5 seconds)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.DIRECT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.DIRECT,
           video_segment=VideoSegment.FIRST_5_SECS_VIDEO,
           evaluation_criteria="""
                 Speech is detected in the audio in the first 5 seconds of the video.
@@ -596,8 +596,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="d_call_to_action_speech",
           name="Call To Action (Speech)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.DIRECT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.DIRECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                 A 'Call To Action' phrase is heard or mentioned in the audio or speech at any time in the video.
@@ -619,8 +619,8 @@ def get_long_form_abcd_feature_configs() -> list[VideoFeature]:
       VideoFeature(
           id="d_call_to_action_text",
           name="Call To Action (Text)",
-          category=VideoFeatureCategory.LONG_FORM_ABCD,
-          sub_category=VideoFeatureSubCategory.DIRECT,
+          category=AbcdContentFormat.LONG_FORM_ABCD,
+          sub_category=AbcdSubCategory.DIRECT,
           video_segment=VideoSegment.FULL_VIDEO,
           evaluation_criteria="""
                A 'Call To Action' phrase is detected in the video supers (overlaid text) at any time in the video.

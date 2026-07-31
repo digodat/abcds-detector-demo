@@ -25,7 +25,7 @@ from google.cloud import videointelligence
 from google.cloud.videointelligence import VideoContext
 from google.cloud import videointelligence_v1 as videointelligence2
 from configuration import Configuration
-from helpers.generic_helpers import (
+from helpers.pipeline_helpers import (
     execute_tasks_in_parallel,
 )
 from gcp_api_services.gcs_api_service import gcs_api_service

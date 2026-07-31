@@ -20,7 +20,7 @@
 
 """Module to test ABCD parameters"""
 
-from utils import build_abcd_params_config
+from utils import build_config_from_cli_args
 from dataclasses import dataclass
 
 
@@ -106,7 +106,7 @@ def test_not_empty_abcd_params():
       top_p=0.1,
   )
 
-  config = build_abcd_params_config(args)
+  config = build_config_from_cli_args(args)
 
   assert config.project_id is not None
   assert config.project_zone is not None

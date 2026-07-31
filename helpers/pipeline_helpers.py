@@ -18,7 +18,7 @@
 #
 ###########################################################################
 
-"""Module to load generic helper functions"""
+"""Pipeline helper functions (video trim, scoring, BQ persistence, parallelism)."""
 
 import os
 import datetime
@@ -83,17 +83,17 @@ def player(video_url: str):
   print(f"{video_url} \n")
 
 
-def print_abcd_assessment(
+def print_assessment(
     brand_name: str,
     video_uri: str,
     evaluated_features: list[models.FeatureEvaluation],
 ) -> None:
-  """Print ABCD Assessments"""
+  """Print feature evaluation summary."""
   bucket_name, path = video_uri.replace("gs://", "").split("/", 1)
   video_url = f"/content/{bucket_name}/{path}"
   # Play Video
   player(video_url)
-  print(f"***** ABCD Assessment for brand {brand_name} ***** \n")
+  print(f"***** Assessment for brand {brand_name} ***** \n")
   print(f"Asset name: {video_uri} \n")
   print_score_details(evaluated_features)
 
@@ -127,37 +127,10 @@ def print_score_details(
   print("\n")
 
 
-def get_call_to_action_api_list() -> list[str]:
-  """Gets a list of call to actions
-
-  Returns
-      list: call to actions
-  """
-  return [
-      "LEARN MORE",
-      "GET QUOTE",
-      "APPLY NOW",
-      "SIGN UP",
-      "CONTACT US",
-      "SUBSCRIBE",
-      "DOWNLOAD",
-      "BOOK NOW",
-      "SHOP NOW",
-      "BUY NOW",
-      "DONATE NOW",
-      "ORDER NOW",
-      "PLAY NOW",
-      "SEE MORE",
-      "START NOW",
-      "VISIT SITE",
-      "WATCH NOW",
-  ]
-
-
 def calculate_score(
     evaluated_features: list[models.FeatureEvaluation],
 ) -> float:
-  """Calculate ABCD final score"""
+  """Calculate feature evaluation final score."""
   total_features = len(evaluated_features)
   passed_features_count = 0
   for feature in evaluated_features:
@@ -320,13 +293,13 @@ def store_in_bq(
     config: Configuration,
     video_assessment: models.VideoAssessment,
 ):
-  """Store ABCD assessment results in BQ"""
+  """Store assessment results in BQ."""
 
   # Import pandas lazily to keep it out of the startup baseline.
   import pandas
 
   print(
-      f"Storing ABCD assessment for video {video_assessment.video_uri} in"
+      f"Storing assessment for video {video_assessment.video_uri} in"
       " BigQuery... \n"
   )
   bq_api_service = bigquery_api_service.BigQueryAPIService(config.project_id)
@@ -359,7 +332,7 @@ def store_in_bq(
       )
     else:
       print(
-          "Error: ABCD assessments not loaded to table"
+          "Error: assessments not loaded to table"
           f" {config.bq_dataset_name}.{config.bq_table_name} because the table"
           " could not be created. \n"
       )
